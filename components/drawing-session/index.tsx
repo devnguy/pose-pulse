@@ -119,6 +119,18 @@ requirements for config:
 how long to display image
 what image to display
 
+Section = {
+  count: 5
+  interval: 30
+}
+
+Config = {
+  sections: Array<Section>
+  total: number
+  pool: Array<Reference>
+}
+
+Config -> Session State
 
 
 */
