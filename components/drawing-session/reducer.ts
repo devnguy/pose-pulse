@@ -6,7 +6,8 @@ export type DrawingSessionAction =
   | DrawingSessionActionStart
   | DrawingSessionActionForward
   | DrawingSessionActionBack
-  | DrawingSessionActionStop;
+  | DrawingSessionActionStop
+  | DrawingSessionActionTogglePause;
 
 type DrawingSessionActionStart = {
   type: "START";
@@ -20,6 +21,9 @@ type DrawingSessionActionBack = {
 type DrawingSessionActionStop = {
   type: "STOP";
 };
+type DrawingSessionActionTogglePause = {
+  type: "TOGGLE_PAUSE";
+};
 
 export function reducer(
   state: DrawingSessionState,
@@ -29,21 +33,25 @@ export function reducer(
     case "START":
       return state;
     case "FORWARD":
-      console.log("forward");
       return forward(state);
     case "BACK":
-      console.log("back");
       return back(state);
+    case "TOGGLE_PAUSE":
+      return togglePause(state);
     case "STOP":
-      return state;
+      return stop(state);
     default:
       throw new Error("unsupported action");
   }
 }
 
 function forward(state: DrawingSessionState): DrawingSessionState {
+  console.log("forward");
   if (state.index === state.total - 1) {
-    return state;
+    return {
+      ...state,
+      isStopped: true,
+    };
   }
 
   const nextIndex = state.index + 1;
@@ -64,15 +72,16 @@ function forward(state: DrawingSessionState): DrawingSessionState {
   const newPool = state.pool.filter((_, i) => i !== randomIndex);
 
   return {
+    ...state,
     index: nextIndex,
-    total: state.total,
+    pool: newPool,
     current,
     history,
-    pool: newPool,
   };
 }
 
 function back(state: DrawingSessionState): DrawingSessionState {
+  console.log("back");
   if (state.index === 0) {
     return state;
   }
@@ -83,5 +92,19 @@ function back(state: DrawingSessionState): DrawingSessionState {
     ...state,
     index: previousIndex,
     current: state.history[previousIndex],
+  };
+}
+
+function stop(state: DrawingSessionState): DrawingSessionState {
+  return {
+    ...state,
+    isStopped: true,
+  };
+}
+
+function togglePause(state: DrawingSessionState): DrawingSessionState {
+  return {
+    ...state,
+    isPaused: !state.isPaused,
   };
 }

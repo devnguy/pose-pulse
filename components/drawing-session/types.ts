@@ -16,4 +16,6 @@ export type DrawingSessionState = {
   current: Reference;
   history: Array<Reference>; // want this to be an interface
   pool: Array<Reference>;
+  isStopped: boolean;
+  isPaused: boolean;
 };

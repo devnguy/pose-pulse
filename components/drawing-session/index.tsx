@@ -20,7 +20,7 @@ import {
 import { getRandomInt } from "@/lib/utils";
 
 export default function DrawingSession() {
-  const [state, dispatch] = useReducer(reducer, initializeState());
+  const [state, dispatch] = useReducer(reducer, undefined, initializeState);
 
   const handleForward = () => {
     dispatch({ type: "FORWARD" });
@@ -30,15 +30,38 @@ export default function DrawingSession() {
     dispatch({ type: "BACK" });
   };
 
+  const handleTogglePause = () => {
+    dispatch({ type: "TOGGLE_PAUSE" });
+  };
+
+  const handleStop = () => {
+    dispatch({ type: "STOP" });
+  };
+
   return (
     <div className="py-12 px-4 h-screen">
-      <div className="flex flex-col justify-center space-y-4 items-center h-full">
-        <div className="relative w-full h-[80vh] flex items-center justify-center">
-          <CurrentImage src={state.current.src} />
+      {state.isStopped ? (
+        <div className="flex flex-col justify-center space-y-4 items-center h-full">
+          Done
         </div>
-        <Controller onForward={handleForward} onBack={handleBack} />
-        <Timer seconds={state.current.interval} onTimeElapsed={handleForward} />
-      </div>
+      ) : (
+        <div className="flex flex-col justify-center space-y-4 items-center h-full">
+          <div className="relative w-full h-[80vh] flex items-center justify-center">
+            <CurrentImage src={state.current.src} />
+          </div>
+          <Controller
+            onForward={handleForward}
+            onBack={handleBack}
+            onTogglePause={handleTogglePause}
+            isPaused={state.isPaused}
+          />
+          <Timer
+            seconds={state.current.interval}
+            onTimeElapsed={handleForward}
+            isPaused={state.isPaused}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -82,5 +105,7 @@ function initializeState(): DrawingSessionState {
     current: pool[randomIndex],
     history,
     pool: newPool,
+    isStopped: false,
+    isPaused: false,
   };
 }
