@@ -11,29 +11,25 @@ export function Timer(props: TimerProps) {
   const [timeRemaining, setTimeRemaining] = useState(seconds);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout | undefined = undefined;
+    setTimeRemaining(seconds);
+  }, [seconds]);
 
-    if (!isPaused) {
-      if (timeRemaining >= 0) {
-        interval = setInterval(() => {
-          setTimeRemaining((prev) => prev - 1);
-        }, 1000);
-      } else {
-        if (interval) {
-          clearInterval(interval);
-        }
-        onTimeElapsed();
-        // incorrectly setting it to the previous state seconds value
-        handleReset(seconds);
-      }
+  useEffect(() => {
+    if (isPaused) {
+      return;
     }
 
+    if (timeRemaining < 0) {
+      onTimeElapsed();
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setTimeRemaining((prev) => prev - 1);
+    }, 1000);
+
     return () => clearInterval(interval);
-  }, [timeRemaining, onTimeElapsed, seconds, isPaused]);
+  }, [timeRemaining, isPaused, onTimeElapsed]);
 
-  const handleReset = (s: number) => {
-    setTimeRemaining(s);
-  };
-
-  return <div>{timeRemaining}</div>;
+  return <div>{timeRemaining >= 0 ? timeRemaining : 0}</div>;
 }

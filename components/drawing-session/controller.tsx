@@ -5,6 +5,7 @@ import {
   ChevronsRight,
   Pause,
   Play,
+  Square,
 } from "lucide-react";
 
 type ControllerProps = {
@@ -12,10 +13,11 @@ type ControllerProps = {
   onForward: () => void;
   onBack: () => void;
   onTogglePause: () => void;
+  onStop: () => void;
 };
 
 export function Controller(props: ControllerProps) {
-  const { isPaused, onForward, onBack, onTogglePause } = props;
+  const { isPaused, onForward, onBack, onTogglePause, onStop } = props;
 
   return (
     <div className="flex space-x-4">
@@ -24,6 +26,9 @@ export function Controller(props: ControllerProps) {
       </Button>
       <Button variant="outline" onClick={onTogglePause}>
         {isPaused ? <Play /> : <Pause />}
+      </Button>
+      <Button variant="outline" onClick={onStop}>
+        <Square />
       </Button>
       <Button variant="outline" onClick={onForward}>
         <ChevronRight />

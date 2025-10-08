@@ -19,3 +19,7 @@ export type DrawingSessionState = {
   isStopped: boolean;
   isPaused: boolean;
 };
+
+export type DrawingSessionConfig = {
+  yo: string;
+};

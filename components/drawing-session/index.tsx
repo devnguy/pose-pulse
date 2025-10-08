@@ -8,7 +8,7 @@ https://i.pinimg.com/736x/08/db/22/08db22a9ea7c801e574e1ada11a024cc.jpg
 
 "use client";
 
-import { useReducer } from "react";
+import { useCallback, useReducer } from "react";
 import { Controller } from "@/components/drawing-session/controller";
 import { CurrentImage } from "@/components/drawing-session/current-image";
 import { reducer } from "@/components/drawing-session/reducer";
@@ -22,9 +22,9 @@ import { getRandomInt } from "@/lib/utils";
 export default function DrawingSession() {
   const [state, dispatch] = useReducer(reducer, undefined, initializeState);
 
-  const handleForward = () => {
+  const handleForward = useCallback(() => {
     dispatch({ type: "FORWARD" });
-  };
+  }, []);
 
   const handleBack = () => {
     dispatch({ type: "BACK" });
@@ -38,6 +38,7 @@ export default function DrawingSession() {
     dispatch({ type: "STOP" });
   };
 
+  // TODO: use a provider and context here so you don't have to pass so many props
   return (
     <div className="py-12 px-4 h-screen">
       {state.isStopped ? (
@@ -52,6 +53,7 @@ export default function DrawingSession() {
           <Controller
             onForward={handleForward}
             onBack={handleBack}
+            onStop={handleStop}
             onTogglePause={handleTogglePause}
             isPaused={state.isPaused}
           />
@@ -70,27 +72,27 @@ function initializeState(): DrawingSessionState {
   const pool: Reference[] = [
     {
       src: "https://i.pinimg.com/1200x/93/e9/f7/93e9f73456983d14f60722ad9c71ccad.jpg",
-      interval: 4,
+      interval: 3,
     },
     {
       src: "https://i.pinimg.com/736x/1b/76/47/1b76478d2def47c4ebfee4252e94adb4.jpg",
-      interval: 5,
-    },
-    {
-      src: "https://i.pinimg.com/736x/e5/93/bd/e593bd305eb6f2057d735c7d786f0800.jpg",
-      interval: 6,
-    },
-    {
-      src: "https://i.pinimg.com/1200x/63/93/38/63933826489b96732e4f5b5560c09b7f.jpg",
       interval: 4,
     },
     {
+      src: "https://i.pinimg.com/736x/e5/93/bd/e593bd305eb6f2057d735c7d786f0800.jpg",
+      interval: 5,
+    },
+    {
+      src: "https://i.pinimg.com/1200x/63/93/38/63933826489b96732e4f5b5560c09b7f.jpg",
+      interval: 3,
+    },
+    {
       src: "https://i.pinimg.com/1200x/32/9c/c8/329cc828e7cc0b078218ae7b072881bb.jpg",
-      interval: 7,
+      interval: 6,
     },
     {
       src: "https://i.pinimg.com/736x/27/fe/5d/27fe5df7c2f6a6797af76313a874e461.jpg",
-      interval: 8,
+      interval: 7,
     },
   ];
 
@@ -109,3 +111,14 @@ function initializeState(): DrawingSessionState {
     isPaused: false,
   };
 }
+
+/*
+
+requirements for config:
+
+how long to display image
+what image to display
+
+
+
+*/
