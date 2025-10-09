@@ -9,6 +9,7 @@ import {
   useContext,
   useReducer,
 } from "react";
+import { StandardSessionFormSchema } from "@/components/session-config/standard-session-form";
 
 type DrawingSessionContextType = {
   state: DrawingSessionState;
@@ -44,7 +45,8 @@ export type DrawingSessionAction =
   | DrawingSessionActionForward
   | DrawingSessionActionBack
   | DrawingSessionActionStop
-  | DrawingSessionActionTogglePause;
+  | DrawingSessionActionTogglePause
+  | DrawingSessionActionConfigure;
 
 type DrawingSessionActionStart = {
   type: "START";
@@ -60,6 +62,10 @@ type DrawingSessionActionStop = {
 };
 type DrawingSessionActionTogglePause = {
   type: "TOGGLE_PAUSE";
+};
+type DrawingSessionActionConfigure = {
+  type: "CONFIGURE";
+  payload: StandardSessionFormSchema;
 };
 
 export function reducer(
@@ -77,6 +83,8 @@ export function reducer(
       return togglePause(state);
     case "STOP":
       return stop(state);
+    case "CONFIGURE":
+      return configure(state, action.payload);
     default:
       throw new Error("unsupported action");
   }
@@ -143,6 +151,27 @@ function togglePause(state: DrawingSessionState): DrawingSessionState {
   return {
     ...state,
     isPaused: !state.isPaused,
+  };
+}
+
+function configure(
+  state: DrawingSessionState,
+  payload: DrawingSessionActionConfigure["payload"],
+): DrawingSessionState {
+  console.log({ payload });
+
+  const newPool = state.pool.map((ref) => ({
+    ...ref,
+    interval: Number(payload.interval),
+  }));
+
+  return {
+    ...state,
+    current: {
+      ...state.current,
+      interval: Number(payload.interval),
+    },
+    pool: newPool,
   };
 }
 

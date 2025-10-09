@@ -20,6 +20,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useDrawingSessionContext } from "@/components/drawing-session/context";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 const numericString = z.string().refine(
   (v) => {
@@ -34,10 +37,13 @@ const FormSchema = z.object({
   interval: numericString,
 });
 
-type FormSchemaType = z.infer<typeof FormSchema>;
+export type StandardSessionFormSchema = z.infer<typeof FormSchema>;
 
-export function SelectForm() {
-  const form = useForm<FormSchemaType>({
+export function StandardSessionForm() {
+  const router = useRouter();
+  const { state, dispatch } = useDrawingSessionContext();
+
+  const form = useForm<StandardSessionFormSchema>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       total: "10",
@@ -45,9 +51,19 @@ export function SelectForm() {
     },
   });
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    console.log({ data });
+  function onSubmit(data: StandardSessionFormSchema) {
+    // TODO: parse data to validate
+    dispatch({
+      type: "CONFIGURE",
+      payload: data,
+    });
+    // useRouter.push to /app/session
+    router.push("/app/session");
   }
+
+  useEffect(() => {
+    console.log(state);
+  }, [state]);
 
   return (
     <Form {...form}>

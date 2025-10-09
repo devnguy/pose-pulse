@@ -19,10 +19,13 @@ export function Timer(props: TimerProps) {
   }, [seconds]);
 
   useEffect(() => {
+    // TODO: handle the case when paused and user presses Next.
+    // Timer should reset but it does not
     if (isPaused) {
       return;
     }
 
+    // TODO: timeRemaining is not being reset when all intervals are the same
     if (timeRemaining < 0) {
       onTimeElapsed();
       return;
@@ -33,7 +36,7 @@ export function Timer(props: TimerProps) {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [timeRemaining, isPaused, onTimeElapsed]);
+  }, [timeRemaining, isPaused, onTimeElapsed, seconds]);
 
   return <div>{timeRemaining >= 0 ? timeRemaining : 0}</div>;
 }
