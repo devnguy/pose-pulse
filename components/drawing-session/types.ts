@@ -1,10 +1,3 @@
-import Stack from "@/lib/stack";
-
-export interface SessionHistory<T> {
-  items: Array<T>;
-  yo: () => undefined;
-}
-
 export type Reference = {
   src: string;
   interval: number;

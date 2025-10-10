@@ -161,9 +161,12 @@ function configure(
   state: DrawingSessionState,
   payload: DrawingSessionActionConfigure["payload"],
 ): DrawingSessionState {
-  console.log({ payload });
-
+  // TODO: hopefully temporarily overriding the initialized state
   const newPool = state.pool.map((ref) => ({
+    ...ref,
+    interval: Number(payload.interval),
+  }));
+  const history = state.history.map((ref) => ({
     ...ref,
     interval: Number(payload.interval),
   }));
@@ -175,6 +178,7 @@ function configure(
       interval: Number(payload.interval),
     },
     pool: newPool,
+    history,
   };
 }
 
