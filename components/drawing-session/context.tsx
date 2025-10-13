@@ -46,7 +46,8 @@ export type DrawingSessionAction =
   | DrawingSessionActionBack
   | DrawingSessionActionStop
   | DrawingSessionActionTogglePause
-  | DrawingSessionActionConfigure;
+  | DrawingSessionActionConfigure
+  | DrawingSessionActionAddToImagePool;
 
 type DrawingSessionActionStart = {
   type: "START";
@@ -66,6 +67,12 @@ type DrawingSessionActionTogglePause = {
 type DrawingSessionActionConfigure = {
   type: "CONFIGURE";
   payload: StandardSessionFormSchema;
+};
+type DrawingSessionActionAddToImagePool = {
+  type: "ADD_TO_IMAGE_POOL";
+  payload: {
+    images: Array<string>;
+  };
 };
 type DrawingSessionActionReset = {
   type: "RESET";
@@ -88,6 +95,8 @@ export function reducer(
       return stop(state);
     case "CONFIGURE":
       return configure(state, action.payload);
+    case "ADD_TO_IMAGE_POOL":
+      return addToImagePool(state, action.payload);
     default:
       throw new Error("unsupported action");
   }
@@ -114,10 +123,19 @@ function forward(state: DrawingSessionState): DrawingSessionState {
   }
 
   // Otherwise, have to take a new item from the pool
-  const randomIndex = getRandomInt(state.pool.length);
-  const current = state.pool[randomIndex];
+  const randomIndex = getRandomInt(state.pool.images.length);
+
+  const current: Reference = {
+    src: state.pool.images[randomIndex],
+    interval: state.pool.intervals[0],
+  };
   const history = [...state.history, current];
-  const newPool = state.pool.filter((_, i) => i !== randomIndex);
+
+  // Remove chosen items from the pool
+  const newPool = {
+    images: state.pool.images.filter((_, i) => i !== randomIndex),
+    intervals: state.pool.intervals.slice(1),
+  };
 
   return {
     ...state,
@@ -161,66 +179,39 @@ function configure(
   state: DrawingSessionState,
   payload: DrawingSessionActionConfigure["payload"],
 ): DrawingSessionState {
-  // TODO: hopefully temporarily overriding the initialized state
-  const newPool = state.pool.map((ref) => ({
-    ...ref,
-    interval: Number(payload.interval),
-  }));
-  const history = state.history.map((ref) => ({
-    ...ref,
-    interval: Number(payload.interval),
-  }));
-
   return {
     ...state,
-    current: {
-      ...state.current,
-      interval: Number(payload.interval),
+    pool: {
+      images: state.pool.images,
+      intervals: Array.from(payload.total).map(() => Number(payload.interval)),
     },
-    pool: newPool,
-    history,
+    total: Number(payload.total),
+    boardId: payload.boardId,
+  };
+}
+
+function addToImagePool(
+  state: DrawingSessionState,
+  payload: DrawingSessionActionAddToImagePool["payload"],
+): DrawingSessionState {
+  return {
+    ...state,
+    pool: {
+      intervals: state.pool.intervals,
+      images: [...state.pool.images, ...payload.images],
+    },
   };
 }
 
 function initializeState(): DrawingSessionState {
-  const pool: Reference[] = [
-    {
-      src: "https://i.pinimg.com/1200x/93/e9/f7/93e9f73456983d14f60722ad9c71ccad.jpg",
-      interval: 3,
-    },
-    {
-      src: "https://i.pinimg.com/736x/1b/76/47/1b76478d2def47c4ebfee4252e94adb4.jpg",
-      interval: 4,
-    },
-    {
-      src: "https://i.pinimg.com/736x/e5/93/bd/e593bd305eb6f2057d735c7d786f0800.jpg",
-      interval: 5,
-    },
-    {
-      src: "https://i.pinimg.com/1200x/63/93/38/63933826489b96732e4f5b5560c09b7f.jpg",
-      interval: 3,
-    },
-    {
-      src: "https://i.pinimg.com/1200x/32/9c/c8/329cc828e7cc0b078218ae7b072881bb.jpg",
-      interval: 6,
-    },
-    {
-      src: "https://i.pinimg.com/736x/27/fe/5d/27fe5df7c2f6a6797af76313a874e461.jpg",
-      interval: 7,
-    },
-  ];
-
-  const randomIndex = getRandomInt(pool.length);
-  const history = [pool[randomIndex]];
-
-  const newPool = pool.filter((_, i) => i !== randomIndex);
-
   return {
     index: 0,
-    total: pool.length,
-    current: pool[randomIndex],
-    history,
-    pool: newPool,
+    total: 0,
+    history: [],
+    pool: {
+      images: [],
+      intervals: [],
+    },
     isStopped: false,
     isPaused: false,
   };

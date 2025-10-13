@@ -23,6 +23,8 @@ import {
 import { useDrawingSessionContext } from "@/components/drawing-session/context";
 import { useRouter } from "next/navigation";
 import { BoardGroup } from "@/components/image-group";
+import { getPinsByBoardId } from "@/data/fakeBoardsData";
+import { ImageSourceResponse, Pin } from "@/app/types";
 
 const numericString = z.string().refine(
   (v) => {
@@ -35,10 +37,21 @@ const numericString = z.string().refine(
 const FormSchema = z.object({
   total: numericString,
   interval: numericString,
-  board: z.string(),
+  boardId: z.string(),
 });
 
 export type StandardSessionFormSchema = z.infer<typeof FormSchema>;
+
+function getImagesFromResponse(
+  response: ImageSourceResponse<Pin>,
+): Array<string> {
+  const images = response.items.map((item) => {
+    const vals = Object.values(item.media.images);
+    return vals[vals.length - 1].url;
+  });
+
+  return images;
+}
 
 export function StandardSessionForm() {
   const router = useRouter();
@@ -54,32 +67,47 @@ export function StandardSessionForm() {
 
   function onSubmit(data: StandardSessionFormSchema) {
     // TODO: parse data to validate
-    console.log({ data });
-    // dispatch({
-    //   type: "CONFIGURE",
-    //   payload: data,
-    // });
-    // router.push("/app/session");
+    dispatch({
+      type: "CONFIGURE",
+      payload: data,
+    });
+    // fetch boardid
+    // dispatch addToImagePool
+    // images is an object with resolutions as the key
+    // convert object to array
+
+    const imagesResponse = getPinsByBoardId(data.boardId);
+    const images = getImagesFromResponse(imagesResponse);
+    dispatch({
+      type: "ADD_TO_IMAGE_POOL",
+      payload: {
+        images,
+      },
+    });
+    router.push("/app/session");
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-6">
-        <FormField
-          control={form.control}
-          name="board"
-          render={({ field }) => (
-            <FormItem>
-              <BoardGroup
-                value={field.value}
-                onValueChangeAction={field.onChange}
-              />
-            </FormItem>
-          )}
-        />
+        <div className="p-8">
+          <FormField
+            control={form.control}
+            name="boardId"
+            render={({ field }) => (
+              <FormItem>
+                <BoardGroup
+                  value={field.value}
+                  onValueChangeAction={field.onChange}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <div className="w-full flex flex-col items-center justify-center space-y-8">
-          <div className="flex space-x-12 w-1/2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 w-1/2">
             <FormField
               control={form.control}
               name="total"

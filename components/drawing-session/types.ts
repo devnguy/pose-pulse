@@ -6,11 +6,15 @@ export type Reference = {
 export type DrawingSessionState = {
   index: number;
   total: number;
-  current: Reference;
   history: Array<Reference>; // want this to be an interface
-  pool: Array<Reference>;
+  pool: {
+    images: Array<string>;
+    intervals: Array<number>;
+  };
   isStopped: boolean;
   isPaused: boolean;
+  boardId?: string;
+  current?: Reference;
 };
 
 export type DrawingSessionConfig = {

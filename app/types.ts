@@ -13,3 +13,16 @@ export type BoardItem = {
   };
   pin_count: number;
 };
+
+export type Pin = {
+  id: string;
+  media: {
+    images: {
+      [key: string]: {
+        width?: number;
+        height?: number;
+        url: string;
+      };
+    };
+  };
+};

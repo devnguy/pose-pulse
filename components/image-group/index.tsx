@@ -27,7 +27,7 @@ export function BoardGroup(props: BoardGroupProps): React.ReactElement {
   const [currentValue, setCurrentValue] = useState<string | undefined>(value);
 
   return (
-    <div className="flex justify-center w-full p-8">
+    <div className="flex justify-center w-full">
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 w-full">
         {boardGroupData.items.map((ig) => (
           <BoardGroupItem

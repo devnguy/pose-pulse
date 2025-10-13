@@ -1,4 +1,3 @@
-import { BoardGroup } from "@/components/image-group";
 import { StandardSessionForm } from "@/components/session-config/standard-session-form";
 
 export default function Page() {
