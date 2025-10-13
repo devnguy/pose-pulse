@@ -25,6 +25,7 @@ import { useRouter } from "next/navigation";
 import { BoardGroup } from "@/components/image-group";
 import { getPinsByBoardId } from "@/data/fakeBoardsData";
 import { ImageSourceResponse, Pin } from "@/app/types";
+import { useEffect } from "react";
 
 const numericString = z.string().refine(
   (v) => {
@@ -68,24 +69,16 @@ export function StandardSessionForm() {
   function onSubmit(data: StandardSessionFormSchema) {
     // TODO: parse data to validate
     dispatch({
-      type: "CONFIGURE",
+      type: "INIT",
       payload: data,
     });
-    // fetch boardid
-    // dispatch addToImagePool
-    // images is an object with resolutions as the key
-    // convert object to array
 
-    const imagesResponse = getPinsByBoardId(data.boardId);
-    const images = getImagesFromResponse(imagesResponse);
-    dispatch({
-      type: "ADD_TO_IMAGE_POOL",
-      payload: {
-        images,
-      },
-    });
     router.push("/app/session");
   }
+
+  useEffect(() => {
+    console.log({ state });
+  }, [state]);
 
   return (
     <Form {...form}>

@@ -10,6 +10,8 @@ import {
   useReducer,
 } from "react";
 import { StandardSessionFormSchema } from "@/components/session-config/standard-session-form";
+import { ImageSourceResponse, Pin } from "@/app/types";
+import { getPinsByBoardId } from "@/data/fakeBoardsData";
 
 type DrawingSessionContextType = {
   state: DrawingSessionState;
@@ -21,7 +23,7 @@ export const DrawingSessionContext = createContext<
 >(undefined);
 
 export function DrawingSessionContextProvider({ children }: PropsWithChildren) {
-  const [state, dispatch] = useReducer(reducer, undefined, initializeState);
+  const [state, dispatch] = useReducer(reducer, undefined, getDefaultState);
 
   return (
     <DrawingSessionContext value={{ state, dispatch }}>
@@ -41,16 +43,16 @@ export function useDrawingSessionContext() {
 }
 
 export type DrawingSessionAction =
-  | DrawingSessionActionStart
+  | DrawingSessionActionInit
   | DrawingSessionActionForward
   | DrawingSessionActionBack
-  | DrawingSessionActionStop
   | DrawingSessionActionTogglePause
-  | DrawingSessionActionConfigure
+  | DrawingSessionActionStop
   | DrawingSessionActionAddToImagePool;
 
-type DrawingSessionActionStart = {
-  type: "START";
+type DrawingSessionActionInit = {
+  type: "INIT";
+  payload: StandardSessionFormSchema;
 };
 type DrawingSessionActionForward = {
   type: "FORWARD";
@@ -64,18 +66,11 @@ type DrawingSessionActionStop = {
 type DrawingSessionActionTogglePause = {
   type: "TOGGLE_PAUSE";
 };
-type DrawingSessionActionConfigure = {
-  type: "CONFIGURE";
-  payload: StandardSessionFormSchema;
-};
 type DrawingSessionActionAddToImagePool = {
   type: "ADD_TO_IMAGE_POOL";
   payload: {
     images: Array<string>;
   };
-};
-type DrawingSessionActionReset = {
-  type: "RESET";
 };
 
 export function reducer(
@@ -83,8 +78,8 @@ export function reducer(
   action: DrawingSessionAction,
 ): DrawingSessionState {
   switch (action.type) {
-    case "START":
-      return state;
+    case "INIT":
+      return init(state, action.payload);
     case "FORWARD":
       return forward(state);
     case "BACK":
@@ -93,8 +88,6 @@ export function reducer(
       return togglePause(state);
     case "STOP":
       return stop(state);
-    case "CONFIGURE":
-      return configure(state, action.payload);
     case "ADD_TO_IMAGE_POOL":
       return addToImagePool(state, action.payload);
     default:
@@ -102,8 +95,49 @@ export function reducer(
   }
 }
 
+function init(
+  state: DrawingSessionState,
+  payload: DrawingSessionActionInit["payload"],
+): DrawingSessionState {
+  const imagesResponse = getPinsByBoardId(payload.boardId);
+  const images = getImagesFromResponse(imagesResponse);
+  const intervals = Array(Number(payload.total)).fill(Number(payload.interval));
+
+  if (state.index === images.length - 1) {
+    return {
+      ...state,
+      isStopped: true,
+    };
+  }
+
+  // Take a new item from the pool
+  const randomIndex = getRandomInt(images.length);
+
+  const current: Reference = {
+    src: images[randomIndex],
+    interval: intervals[0],
+  };
+  const history = [current];
+
+  // Remove chosen items from the pool
+  const newPool = {
+    images: images.filter((_, i) => i !== randomIndex),
+    intervals: intervals.slice(1),
+  };
+
+  return {
+    index: 0,
+    total: Number(payload.total),
+    history,
+    pool: newPool,
+    isStopped: false,
+    isPaused: false,
+    current,
+    boardId: payload.boardId,
+  };
+}
+
 function forward(state: DrawingSessionState): DrawingSessionState {
-  console.log("forward");
   if (state.index === state.total - 1) {
     return {
       ...state,
@@ -147,7 +181,6 @@ function forward(state: DrawingSessionState): DrawingSessionState {
 }
 
 function back(state: DrawingSessionState): DrawingSessionState {
-  console.log("back");
   if (state.index === 0) {
     return state;
   }
@@ -175,21 +208,6 @@ function togglePause(state: DrawingSessionState): DrawingSessionState {
   };
 }
 
-function configure(
-  state: DrawingSessionState,
-  payload: DrawingSessionActionConfigure["payload"],
-): DrawingSessionState {
-  return {
-    ...state,
-    pool: {
-      images: state.pool.images,
-      intervals: Array.from(payload.total).map(() => Number(payload.interval)),
-    },
-    total: Number(payload.total),
-    boardId: payload.boardId,
-  };
-}
-
 function addToImagePool(
   state: DrawingSessionState,
   payload: DrawingSessionActionAddToImagePool["payload"],
@@ -197,13 +215,24 @@ function addToImagePool(
   return {
     ...state,
     pool: {
-      intervals: state.pool.intervals,
+      ...state.pool,
       images: [...state.pool.images, ...payload.images],
     },
   };
 }
 
-function initializeState(): DrawingSessionState {
+function getImagesFromResponse(
+  response: ImageSourceResponse<Pin>,
+): Array<string> {
+  const images = response.items.map((item) => {
+    const vals = Object.values(item.media.images);
+    return vals[vals.length - 1].url;
+  });
+
+  return images;
+}
+
+function getDefaultState(): DrawingSessionState {
   return {
     index: 0,
     total: 0,
