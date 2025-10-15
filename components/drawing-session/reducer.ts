@@ -4,7 +4,7 @@ import {
   Reference,
 } from "@/components/drawing-session/types";
 
-import { StandardSessionFormSchema } from "@/components/session-config/standard-session-form";
+import { SessionConfigFormSchema } from "@/components/session-config";
 import { ImageSourceResponse, Pin } from "@/app/types";
 import { getPinsByBoardId } from "@/data/fakeBoardsData";
 export type DrawingSessionAction =
@@ -17,7 +17,7 @@ export type DrawingSessionAction =
 
 type DrawingSessionActionInit = {
   type: "INIT";
-  payload: StandardSessionFormSchema;
+  payload: SessionConfigFormSchema;
 };
 type DrawingSessionActionForward = {
   type: "FORWARD";
@@ -60,39 +60,45 @@ export function reducer(
   }
 }
 
+// TODO: Does this function and its variable naming make sense?
 function init(
   state: DrawingSessionState,
   payload: DrawingSessionActionInit["payload"],
 ): DrawingSessionState {
   const imagesResponse = getPinsByBoardId(payload.boardId);
   const images = getImagesFromResponse(imagesResponse);
-  const intervals = Array(Number(payload.total)).fill(Number(payload.interval));
 
-  if (state.index === images.length - 1) {
+  const start: { intervals: Array<number>; total: number } = {
+    intervals: [],
+    total: 0,
+  };
+
+  const aggregate = payload.sections.reduce((prev, cur) => {
+    const intervals = Array(Number(cur.count)).fill(Number(cur.interval));
     return {
-      ...state,
-      isStopped: true,
+      intervals: [...prev.intervals, ...intervals],
+      total: prev.total + Number(cur.count),
     };
-  }
+  }, start);
 
   // Take a new item from the pool
   const randomIndex = getRandomInt(images.length);
 
   const current: Reference = {
     src: images[randomIndex],
-    interval: intervals[0],
+    interval: aggregate.intervals[0],
   };
   const history = [current];
 
   // Remove chosen items from the pool
   const newPool = {
     images: images.filter((_, i) => i !== randomIndex),
-    intervals: intervals.slice(1),
+    intervals: aggregate.intervals.slice(1),
   };
 
   return {
     index: 0,
-    total: Number(payload.total),
+    total: aggregate.total,
     history,
     pool: newPool,
     isStopped: false,

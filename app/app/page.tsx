@@ -1,4 +1,4 @@
-import { StandardSessionForm } from "@/components/session-config/standard-session-form";
+import { StandardSessionForm } from "@/components/session-config";
 
 export default function Page() {
   return (
