@@ -16,7 +16,3 @@ export type DrawingSessionState = {
   boardId?: string;
   current?: Reference;
 };
-
-export type DrawingSessionConfig = {
-  yo: string;
-};

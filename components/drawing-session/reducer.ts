@@ -6,7 +6,6 @@ import {
 
 import { SessionConfigFormSchema } from "@/components/session-config";
 import { ImageSourceResponse, Pin } from "@/app/types";
-import { getPinsByBoardId } from "@/data/fakeBoardsData";
 export type DrawingSessionAction =
   | DrawingSessionActionInit
   | DrawingSessionActionForward
@@ -17,7 +16,9 @@ export type DrawingSessionAction =
 
 type DrawingSessionActionInit = {
   type: "INIT";
-  payload: SessionConfigFormSchema;
+  payload: SessionConfigFormSchema & {
+    images: Array<string>;
+  };
 };
 type DrawingSessionActionForward = {
   type: "FORWARD";
@@ -65,9 +66,6 @@ function init(
   state: DrawingSessionState,
   payload: DrawingSessionActionInit["payload"],
 ): DrawingSessionState {
-  const imagesResponse = getPinsByBoardId(payload.boardId);
-  const images = getImagesFromResponse(imagesResponse);
-
   const start: { intervals: Array<number>; total: number } = {
     intervals: [],
     total: 0,
@@ -82,17 +80,17 @@ function init(
   }, start);
 
   // Take a new item from the pool
-  const randomIndex = getRandomInt(images.length);
+  const randomIndex = getRandomInt(payload.images.length);
 
   const current: Reference = {
-    src: images[randomIndex],
+    src: payload.images[randomIndex],
     interval: aggregate.intervals[0],
   };
   const history = [current];
 
   // Remove chosen items from the pool
   const newPool = {
-    images: images.filter((_, i) => i !== randomIndex),
+    images: payload.images.filter((_, i) => i !== randomIndex),
     intervals: aggregate.intervals.slice(1),
   };
 
@@ -192,7 +190,7 @@ function addToImagePool(
   };
 }
 
-function getImagesFromResponse(
+export function getImagesFromResponse(
   response: ImageSourceResponse<Pin>,
 ): Array<string> {
   const images = response.items.map((item) => {

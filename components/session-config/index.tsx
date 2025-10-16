@@ -19,6 +19,9 @@ import { useEffect, useState } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { ClassModeForm } from "@/components//session-config/class-mode-form";
 import { StandardModeForm } from "@/components//session-config/standard-mode-form";
+import { BoardItem } from "@/app/types";
+import { getPinsByBoardId } from "../drawing-session/actions";
+import { getImagesFromResponse } from "../drawing-session/reducer";
 
 const numericString = z.string().refine(
   (v) => {
@@ -50,7 +53,12 @@ export const DEFAULT_SECTION_CONFIG = {
   interval: "30",
 };
 
-export function StandardSessionForm() {
+type SessionConfigProps = {
+  boardsData: Array<BoardItem>;
+};
+
+export function SessionConfig(props: SessionConfigProps) {
+  const { boardsData } = props;
   const router = useRouter();
   const { state, dispatch } = useDrawingSessionContext();
   const [sessionType, setSessionType] = useState<SessionType>(
@@ -69,14 +77,18 @@ export function StandardSessionForm() {
     control: form.control,
   });
 
-  function onSubmit(data: SessionConfigFormSchema) {
+  async function onSubmit(data: SessionConfigFormSchema) {
+    // remove any form changes from class mode
     if (sessionType === SessionType.STANDARD) {
       data.sections = data.sections.slice(0, 1);
     }
-    console.log({ data });
+
+    const response = await getPinsByBoardId(data.boardId);
+    const images = getImagesFromResponse(response);
+
     dispatch({
       type: "INIT",
-      payload: data,
+      payload: { ...data, images },
     });
 
     router.push("/app/session");
@@ -99,6 +111,7 @@ export function StandardSessionForm() {
                 <BoardGroup
                   value={field.value}
                   onValueChangeAction={field.onChange}
+                  boardsData={boardsData}
                 />
                 <FormMessage />
               </FormItem>

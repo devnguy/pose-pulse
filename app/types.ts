@@ -8,7 +8,7 @@ export type BoardItem = {
   board_pins_modified_at: string;
   name: string;
   media: {
-    image_cover_url: string;
+    image_cover_url: string | null;
     pin_thumbnail_urls: Array<string>;
   };
   pin_count: number;
