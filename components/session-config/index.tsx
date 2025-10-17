@@ -19,8 +19,8 @@ import { useEffect, useState } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { ClassModeForm } from "@/components//session-config/class-mode-form";
 import { StandardModeForm } from "@/components//session-config/standard-mode-form";
-import { BoardItem } from "@/app/types";
-import { getPinsByBoardId } from "@/components/drawing-session/actions";
+import { BoardItem, ImageSourceResponse } from "@/app/types";
+import { getPinsByBoardId } from "@/lib/api/pinterest/queries";
 import { getImagesFromResponse } from "@/components/drawing-session/helpers";
 
 const numericString = z.string().refine(
@@ -54,7 +54,8 @@ export const DEFAULT_SECTION_CONFIG = {
 };
 
 type SessionConfigProps = {
-  boardsData: Array<BoardItem>;
+  boardsData: Promise<ImageSourceResponse<BoardItem>>;
+  // boardsData: ImageSourceResponse<BoardItem>;
 };
 
 export function SessionConfig(props: SessionConfigProps) {
@@ -109,9 +110,9 @@ export function SessionConfig(props: SessionConfigProps) {
               <FormItem>
                 <FormLabel>Choose a Board</FormLabel>
                 <BoardGroup
+                  boardsData={boardsData}
                   value={field.value}
                   onValueChangeAction={field.onChange}
-                  boardsData={boardsData}
                 />
                 <FormMessage />
               </FormItem>

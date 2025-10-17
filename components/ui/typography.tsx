@@ -53,5 +53,16 @@ function Small({ className, ...props }: React.HTMLAttributes<HTMLElement>) {
     />
   );
 }
+function ExtraSmall({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLElement>) {
+  return (
+    <small
+      className={cn("text-xs leading-none font-medium", className)}
+      {...props}
+    />
+  );
+}
 
-export { H1, H2, H3, H4, Small };
+export { H1, H2, H3, H4, Small, ExtraSmall };
