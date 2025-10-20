@@ -25,6 +25,8 @@ export function BoardGroup(props: BoardGroupProps): React.ReactElement {
   const { value, onValueChangeAction, boardsData } = props;
   const resolvedBoardsData = use(boardsData);
 
+  console.log({ resolvedBoardsData });
+
   const [currentValue, setCurrentValue] = useState<string | undefined>(value);
 
   return (

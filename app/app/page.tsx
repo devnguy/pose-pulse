@@ -7,7 +7,7 @@ export default async function Page() {
   // fake data so you don't use up all your requests
   // const boardsData = await Promise.resolve(fakeBoardsData);
 
-  console.log({ boardsData });
+  // console.log({ boardsData });
 
   return <SessionConfig boardsData={boardsData} />;
 }

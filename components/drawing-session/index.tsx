@@ -14,7 +14,7 @@ export default function DrawingSession() {
   }, [dispatch]);
 
   return (
-    <div className="py-12 px-4 h-screen">
+    <div className="py-12 px-4 h-screen w-full">
       {state.isStopped ? (
         <div className="flex flex-col justify-center space-y-4 items-center h-full">
           Done
