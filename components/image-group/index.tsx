@@ -10,37 +10,37 @@ import { formatDistanceToNowShort } from "@/lib/utils";
 type BoardGroupProps = {
   value: string | undefined;
   onValueChangeAction: (v: string) => void;
-  boardsData: Promise<ImageSourceResponse<BoardItem>>;
+  boardsPromise: Promise<ImageSourceResponse<BoardItem>>;
   // boardsData: ImageSourceResponse<BoardItem>;
 };
 
-type ImageGroupCardProps = {
-  boardData: BoardItem;
+type BoardCardProps = {
+  board: BoardItem;
   value: string;
   selected: boolean;
   onClickAction: () => void;
 };
 
 export function BoardGroup(props: BoardGroupProps): React.ReactElement {
-  const { value, onValueChangeAction, boardsData } = props;
-  const resolvedBoardsData = use(boardsData);
+  const { value, onValueChangeAction, boardsPromise } = props;
+  const boards = use(boardsPromise);
 
-  console.log({ resolvedBoardsData });
+  console.log({ boards });
 
   const [currentValue, setCurrentValue] = useState<string | undefined>(value);
 
   return (
     <div className="flex justify-center w-full">
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 w-full">
-        {resolvedBoardsData.items.map((ig) => (
+        {boards.items.map((board) => (
           <BoardGroupItem
-            key={ig.id}
-            value={ig.id}
-            boardData={ig}
-            selected={currentValue === ig.id}
+            key={board.id}
+            value={board.id}
+            board={board}
+            selected={currentValue === board.id}
             onClickAction={() => {
-              setCurrentValue(ig.id);
-              onValueChangeAction(ig.id);
+              setCurrentValue(board.id);
+              onValueChangeAction(board.id);
             }}
           />
         ))}
@@ -49,10 +49,10 @@ export function BoardGroup(props: BoardGroupProps): React.ReactElement {
   );
 }
 
-export default function BoardGroupItem(props: ImageGroupCardProps) {
-  const { onClickAction, boardData, selected } = props;
-  const cover = boardData.media.image_cover_url;
-  const thumbnails = boardData.media.pin_thumbnail_urls;
+export default function BoardGroupItem(props: BoardCardProps) {
+  const { onClickAction, board, selected } = props;
+  const cover = board.media.image_cover_url;
+  const thumbnails = board.media.pin_thumbnail_urls;
 
   return (
     cover !== null && (
@@ -82,7 +82,7 @@ export default function BoardGroupItem(props: ImageGroupCardProps) {
             </div>
 
             <div className="col-start-3 relative">
-              {boardData.media.pin_thumbnail_urls.length > 0 ? (
+              {board.media.pin_thumbnail_urls.length > 0 ? (
                 <Image
                   src={thumbnails[0]}
                   alt=""
@@ -109,12 +109,12 @@ export default function BoardGroupItem(props: ImageGroupCardProps) {
             </div>
           </div>
           <div className="h-[62px] p-2 text-left">
-            <H4>{boardData.name}</H4>
+            <H4>{board.name}</H4>
             <div>
               <p className="space-x-2">
-                <ExtraSmall>{boardData.pin_count} Pins</ExtraSmall>
+                <ExtraSmall>{board.pin_count} Pins</ExtraSmall>
                 <ExtraSmall className="text-slate-500">
-                  {formatDistanceToNowShort(boardData.board_pins_modified_at)}
+                  {formatDistanceToNowShort(board.board_pins_modified_at)}
                 </ExtraSmall>
               </p>
             </div>

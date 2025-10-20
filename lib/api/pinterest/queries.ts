@@ -33,3 +33,7 @@ export const getBoards = cache(
     return await response.json();
   },
 );
+
+async function slow(time: number = 2500) {
+  return new Promise((resolve) => setTimeout(resolve, time));
+}

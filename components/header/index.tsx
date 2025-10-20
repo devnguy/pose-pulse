@@ -11,7 +11,8 @@ export function Header() {
           <H3>Pose Pulse</H3>
         </Button>
       </Link>
-      <div>
+      <div className="flex items-center space-x-2">
+        <Button variant="outline">Connect to Pinterest</Button>
         <Button variant="ghost" size="icon">
           <Eclipse />
         </Button>

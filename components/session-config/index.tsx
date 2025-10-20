@@ -15,13 +15,14 @@ import {
 import { useDrawingSessionContext } from "@/components/drawing-session/context";
 import { useRouter } from "next/navigation";
 import { BoardGroup } from "@/components/image-group";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { ClassModeForm } from "@/components//session-config/class-mode-form";
 import { StandardModeForm } from "@/components//session-config/standard-mode-form";
 import { BoardItem, ImageSourceResponse } from "@/app/types";
 import { getPinsByBoardId } from "@/lib/api/pinterest/queries";
 import { getImagesFromResponse } from "@/components/drawing-session/helpers";
+import { BoardGroupSkeleton } from "@/components/ui/skeleton";
 
 const numericString = z.string().refine(
   (v) => {
@@ -54,12 +55,12 @@ export const DEFAULT_SECTION_CONFIG = {
 };
 
 type SessionConfigProps = {
-  boardsData: Promise<ImageSourceResponse<BoardItem>>;
-  // boardsData: ImageSourceResponse<BoardItem>;
+  boardsPromise: Promise<ImageSourceResponse<BoardItem>>;
+  // boardsPromise: ImageSourceResponse<BoardItem>;
 };
 
 export function SessionConfig(props: SessionConfigProps) {
-  const { boardsData } = props;
+  const { boardsPromise } = props;
   const router = useRouter();
   const { state, dispatch } = useDrawingSessionContext();
   const [sessionType, setSessionType] = useState<SessionType>(
@@ -102,23 +103,25 @@ export function SessionConfig(props: SessionConfigProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-6">
-        <div className="">
-          <FormField
-            control={form.control}
-            name="boardId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Choose a Board</FormLabel>
-                <BoardGroup
-                  boardsData={boardsData}
-                  value={field.value}
-                  onValueChangeAction={field.onChange}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        <Suspense fallback={<BoardGroupSkeleton />}>
+          <div className="">
+            <FormField
+              control={form.control}
+              name="boardId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Choose a Board</FormLabel>
+                  <BoardGroup
+                    boardsPromise={boardsPromise}
+                    value={field.value}
+                    onValueChangeAction={field.onChange}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </Suspense>
 
         <div className="w-full flex flex-col space-y-8">
           <ToggleGroup
