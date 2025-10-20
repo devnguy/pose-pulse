@@ -1,3 +1,4 @@
+import { Header } from "@/components/header";
 import { SessionConfig } from "@/components/session-config";
 import { getBoards } from "@/lib/api/pinterest/queries";
 
@@ -9,5 +10,12 @@ export default async function Page() {
 
   // console.log({ boardsData });
 
-  return <SessionConfig boardsData={boardsData} />;
+  return (
+    <div className="w-full">
+      <Header />
+      <div className="pt-6 ">
+        <SessionConfig boardsData={boardsData} />
+      </div>
+    </div>
+  );
 }
