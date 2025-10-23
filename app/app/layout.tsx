@@ -1,4 +1,5 @@
 import { DrawingSessionContextProvider } from "@/components/drawing-session/context";
+import { Footer } from "@/components/footer";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -8,6 +9,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           {children}
         </div>
       </div>
+      <Footer />
     </DrawingSessionContextProvider>
   );
 }

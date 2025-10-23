@@ -16,7 +16,7 @@ export default async function Page() {
     <div className="w-full">
       <Header />
       <div className="flex justify-center">
-        <div className="w-[640px]">
+        <div className="w-[740px]">
           <div className="py-6">
             <H1 className="text-left">Drawing Session</H1>
           </div>
