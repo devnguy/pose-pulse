@@ -18,8 +18,12 @@ export function formatDistanceToNowShort(date: string) {
     // remove "about"
     strArray.splice(0, 1);
   }
-  // take first letter from interval
-  const abbreviation = strArray[strArray.length - 1].split("")[0];
+  const charArray = strArray[strArray.length - 1].split("");
+
+  // differentiate months from minutes
+  // take first letter from interval for all others
+  const abbreviation =
+    charArray[0] === "m" && charArray[1] === "o" ? "mo" : charArray[0];
 
   return strArray[0] + abbreviation;
 }
