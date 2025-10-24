@@ -28,6 +28,13 @@ import {
 } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import { cn } from "@/lib/utils";
+import {
+  attachClosestEdge,
+  type Edge,
+  extractClosestEdge,
+} from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
+import { DropIndicator } from "@atlaskit/pragmatic-drag-and-drop-react-drop-indicator/box";
+import { triggerPostMoveFlash } from "@atlaskit/pragmatic-drag-and-drop-flourish/trigger-post-move-flash";
 
 type SectionRowProps = {
   index: number;
@@ -50,10 +57,10 @@ export function ClassModeForm(props: {
       <Table>
         <TableHeader>
           <TableRow className="border-none hover:bg-transparent">
-            <TableHead className="w-0" />
+            <TableHead className="w-0 p-0" />
             <TableHead>Number of Images</TableHead>
             <TableHead>Interval</TableHead>
-            <TableHead />
+            <TableHead className="w-0 p-0" />
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -81,17 +88,29 @@ export function ClassModeForm(props: {
     </div>
   );
 }
+type State =
+  | {
+      type: "idle";
+    }
+  | {
+      type: "preview";
+    }
+  | {
+      type: "is-over";
+      closestEdge: Edge | null;
+    };
 
 function SectionRow(props: SectionRowProps) {
   const {
     index,
     control,
-    fieldArray: { fields, swap, remove },
+    fieldArray: { fields, move, remove },
   } = props;
 
   const ref = useRef<HTMLTableRowElement>(null);
   const dragHandleRef = useRef<HTMLButtonElement>(null);
-  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [state, setState] = useState<State>({ type: "idle" });
+  const [shouldShowControls, setShouldShowControls] = useState(false);
 
   const item = fields[index];
   const isSingle = fields.length === 1;
@@ -108,6 +127,8 @@ function SectionRow(props: SectionRowProps) {
     invariant(element);
     invariant(dragHandle);
 
+    const isFirst = index === 0;
+
     return combine(
       draggable({
         element,
@@ -119,40 +140,119 @@ function SectionRow(props: SectionRowProps) {
           };
         },
         onDragStart() {
-          setIsDragging(true);
+          setState({ type: "preview" });
         },
         onDrop() {
-          setIsDragging(false);
+          setState({ type: "idle" });
         },
       }),
       dropTargetForElements({
         element,
-        getData() {
-          return {
-            ...item,
-            index,
-          };
+        canDrop({ source }) {
+          return source.data.index !== index; // change this to id
+        },
+        getData({ input, element }) {
+          const data = { ...item, index };
+          return attachClosestEdge(data, {
+            input,
+            element,
+            allowedEdges: ["top", "bottom"],
+          });
+        },
+        onDragEnter(args) {
+          setState({
+            type: "is-over",
+            closestEdge: extractClosestEdge(args.self.data),
+          });
+        },
+        onDragLeave() {
+          setState({ type: "idle" });
+        },
+        onDrag({ source, self }) {
+          const closestEdge: Edge | null = extractClosestEdge(self.data);
+
+          // only update react state if the `closestEdge` changes
+          setState((current) => {
+            const sourceIndex = source.data.index;
+            invariant(typeof sourceIndex === "number");
+
+            if (current.type !== "is-over") {
+              return current;
+            }
+            if (current.closestEdge === closestEdge) {
+              return current;
+            }
+            return {
+              type: "is-over",
+              closestEdge,
+            };
+          });
         },
         onDrop({ source, self }) {
           invariant(typeof source.data.index === "number");
           invariant(typeof self.data.index === "number");
-          swap(source.data.index, self.data.index);
+
+          const sourceIndex = source.data.index;
+          invariant(typeof sourceIndex === "number");
+          const isItemBeforeSource = index < sourceIndex;
+          const isItemAfterSource = index > sourceIndex;
+
+          if (state.type === "is-over") {
+            if (isItemAfterSource) {
+              if (state.closestEdge === "top") {
+                if (isFirst) {
+                  move(source.data.index, 0);
+                } else {
+                  move(source.data.index, self.data.index - 1);
+                }
+              } else if (state.closestEdge === "bottom") {
+                move(source.data.index, self.data.index);
+              }
+            } else if (isItemBeforeSource) {
+              if (state.closestEdge === "top") {
+                move(source.data.index, self.data.index);
+              } else if (state.closestEdge === "bottom") {
+                move(source.data.index, self.data.index + 1);
+              }
+            }
+          }
+          setState({ type: "idle" });
+          if (source.element) {
+            triggerPostMoveFlash(source.element);
+          }
         },
       }),
     );
-  }, [item, index, swap]);
+  }, [item, index, move, state]);
 
   return (
     <TableRow
-      className={cn("border-none", isDragging && "opacity-40")}
+      className={cn(
+        "border-0 relative hover:bg-transparent",
+        state.type === "preview" && "opacity-40",
+      )}
       ref={ref}
+      onMouseEnter={() => {
+        setShouldShowControls(true);
+      }}
+      onMouseLeave={() => {
+        setShouldShowControls(false);
+      }}
+      onTouchStart={() => {
+        setShouldShowControls(true);
+      }}
     >
-      <TableCell className="p-0">
+      <TableCell className="p-0 w-0">
         <Button
           variant={"ghost"}
           size="icon"
-          className="p-0 hover:cursor-grab w-6 h-6 hover:bg-transparent"
+          className={cn(
+            "absolute -left-4.5 top-3 hover:cursor-grab w-6 h-6 hover:bg-transparent transition-none",
+            !shouldShowControls && "opacity-0",
+            isSingle && "hidden",
+          )}
           ref={dragHandleRef}
+          type="button"
         >
           <GripVertical
             size={16}
@@ -190,16 +290,23 @@ function SectionRow(props: SectionRowProps) {
           )}
         />
       </TableCell>
-      <TableCell>
+      <TableCell className="p-0 w-6">
         <Button
           variant="ghost"
           size="icon"
-          type="button"
+          className={cn(
+            "p-0 w-6 h-6 transition-none",
+            !shouldShowControls && "opacity-0",
+            isSingle && "hidden",
+          )}
           onClick={handleRemove}
-          disabled={isSingle}
+          type="button"
         >
           <X />
         </Button>
+        {state.type === "is-over" && state.closestEdge ? (
+          <DropIndicator edge={state.closestEdge} type="terminal-no-bleed" />
+        ) : null}
       </TableCell>
     </TableRow>
   );

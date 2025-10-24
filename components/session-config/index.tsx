@@ -73,7 +73,33 @@ export function SessionConfig(props: SessionConfigProps) {
   const form = useForm<SessionConfigFormSchema>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      sections: [DEFAULT_SECTION_CONFIG],
+      // sections: [DEFAULT_SECTION_CONFIG],
+      sections: [
+        {
+          count: "5",
+          interval: "30",
+        },
+        {
+          count: "10",
+          interval: "60",
+        },
+        {
+          count: "15",
+          interval: "90",
+        },
+        {
+          count: "20",
+          interval: "180",
+        },
+        {
+          count: "30",
+          interval: "300",
+        },
+        {
+          count: "50",
+          interval: "600",
+        },
+      ],
     },
   });
 
