@@ -100,8 +100,6 @@ export function StandardModeForm(props: {
           </FormRow>
         )}
       />
-
-      <Separator />
     </div>
   );
 }

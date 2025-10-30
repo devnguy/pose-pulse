@@ -20,11 +20,7 @@ export default async function Page() {
           <div className="py-6">
             <H1 className="text-left">Drawing Session</H1>
           </div>
-          <Card>
-            <CardContent>
-              <SessionConfig boardsPromise={boardsPromise} />
-            </CardContent>
-          </Card>
+          <SessionConfig boardsPromise={boardsPromise} />
         </div>
       </div>
     </div>

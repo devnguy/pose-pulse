@@ -64,4 +64,11 @@ function ExtraSmall({
   );
 }
 
-export { H1, H2, H3, H4, SectionHeading, ExtraSmall };
+function SectionSubHeading({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+  return <div className={cn("font-medium", className)} {...props} />;
+}
+
+export { H1, H2, H3, H4, SectionHeading, SectionSubHeading, ExtraSmall };

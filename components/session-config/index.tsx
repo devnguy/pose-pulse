@@ -25,12 +25,15 @@ import { getPinsByBoardId } from "@/lib/api/pinterest/queries";
 import { getImagesFromResponse } from "@/components/drawing-session/helpers";
 import { BoardGroupSkeleton } from "@/components/ui/skeleton";
 import { Separator } from "../ui/separator";
-import { SectionHeading } from "../ui/typography";
+import { SectionHeading, SectionSubHeading } from "../ui/typography";
 import { ScrollArea } from "../ui/scroll-area";
 import { Switch } from "../ui/switch";
 import { Input } from "../ui/input";
 import { ImageSourceSelect, SessionTypeSelect } from "./select";
 import { Images } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { Label } from "../ui/label";
+import { Card, CardContent } from "../ui/card";
 
 const numericString = z.string().refine(
   (v) => {
@@ -170,74 +173,99 @@ export function SessionConfig(props: SessionConfigProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex flex-col w-full gap-3"
+      >
         <SectionHeading>Customize Session</SectionHeading>
 
-        <FormRow>
-          <div className="flex flex-col flex-3 gap-1">
-            <FormLabel>Image Source</FormLabel>
-            <FormDescription>Location of the reference images</FormDescription>
-          </div>
-          <div className="flex-1">
-            <ImageSourceSelect
-              defaultValue={imageSourceType}
-              onValueChange={(val: ImageSourceType) => {
-                setImageSourceType(val);
-              }}
-            />
-          </div>
-        </FormRow>
+        <div className="flex flex-col gap-2">
+          <SectionSubHeading>Image Source</SectionSubHeading>
+          <Tabs defaultValue={ImageSourceType.PINTEREST}>
+            <TabsList>
+              <TabsTrigger value={ImageSourceType.PINTEREST}>
+                Pinterest
+              </TabsTrigger>
+              <TabsTrigger value={ImageSourceType.LOCAL}>Local</TabsTrigger>
+            </TabsList>
 
-        <Separator />
+            <TabsContent value={ImageSourceType.PINTEREST}>
+              <Card className="p-0">
+                <CardContent>
+                  <PinterestImageInputField />
+                </CardContent>
+              </Card>
+            </TabsContent>
+            <TabsContent value={ImageSourceType.LOCAL}>
+              <Card className="p-0">
+                <CardContent>
+                  <LocalImageInputField />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
 
-        {imageSourceType === ImageSourceType.PINTEREST ? (
-          <PinterestImageInputField />
-        ) : (
-          <LocalImageInputField />
-        )}
+        <div className="flex flex-col gap-2">
+          <SectionSubHeading>Session Type</SectionSubHeading>
+          <Tabs defaultValue={SessionType.STANDARD}>
+            <TabsList>
+              <TabsTrigger value={SessionType.STANDARD}>Standard</TabsTrigger>
+              <TabsTrigger value={SessionType.CLASS}>Class</TabsTrigger>
+              <TabsTrigger value={SessionType.CUSTOM}>Custom</TabsTrigger>
+            </TabsList>
 
-        <Separator />
+            <TabsContent value={SessionType.STANDARD}>
+              <Card className="p-0">
+                <CardContent>
+                  <StandardModeForm control={form.control} />
+                </CardContent>
+              </Card>
+            </TabsContent>
+            <TabsContent value={SessionType.CLASS}>
+              <Card className="p-0">
+                <CardContent>
+                  <ClassModeForm
+                    control={form.control}
+                    fieldArray={sectionsField}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+            <TabsContent value={SessionType.CUSTOM}>
+              <Card className="p-0">
+                <CardContent>
+                  <ClassModeForm
+                    control={form.control}
+                    fieldArray={sectionsField}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
 
-        <div>
-          <FormRow>
-            <div className="flex flex-col flex-3 gap-1">
-              <FormLabel>Session Type</FormLabel>
-              <FormDescription>The type of drawing session</FormDescription>
-            </div>
-            <div className="flex-1">
-              <SessionTypeSelect
-                defaultValue={sessionType}
-                onValueChange={(val: SessionType) => {
-                  setSessionType(val);
-                }}
-              />
-            </div>
-          </FormRow>
-          <Separator />
+        <div className="flex flex-col gap-2">
+          <SectionSubHeading>Settings</SectionSubHeading>
+          <Card className="p-0">
+            <CardContent>
+              <FormRow>
+                <div className="flex flex-col flex-3 gap-1">
+                  <FormLabel>Hard Mode</FormLabel>
+                  <FormDescription>
+                    Disable pause, back, and skip controls during the session
+                  </FormDescription>
+                </div>
+                <div>
+                  <Switch />
+                </div>
+              </FormRow>
+            </CardContent>
+          </Card>
+        </div>
 
-          {sessionType === SessionType.STANDARD ? (
-            <StandardModeForm control={form.control} />
-          ) : (
-            <ClassModeForm control={form.control} fieldArray={sectionsField} />
-          )}
-
-          <FormRow>
-            <div className="flex flex-col flex-3 gap-1">
-              <FormLabel>Hard Mode</FormLabel>
-              <FormDescription>
-                Disable pause, back, and skip controls during the session
-              </FormDescription>
-            </div>
-            <div>
-              <Switch />
-            </div>
-          </FormRow>
-
-          <Separator />
-
-          <div className="flex w-full pt-3">
-            <Button type="submit">Start</Button>
-          </div>
+        <div className="flex w-full pt-3">
+          <Button type="submit">Start</Button>
         </div>
       </form>
     </Form>
