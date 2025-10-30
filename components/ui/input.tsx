@@ -1,4 +1,6 @@
 import * as React from "react";
+import { Images } from "lucide-react";
+import { Label } from "@/components/ui/label";
 
 import { cn } from "@/lib/utils";
 
@@ -18,4 +20,35 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   );
 }
 
-export { Input };
+function FileDropInput() {
+  const BrowseButton = () => {
+    return (
+      <span className="inline-flex">
+        <Label htmlFor="file" className="hover:cursor-pointer underline">
+          Browse
+        </Label>
+        <Input
+          id="file"
+          type="file"
+          multiple
+          accept="image/*"
+          className="hidden"
+        />
+      </span>
+    );
+  };
+
+  return (
+    <div className="h-full w-full flex flex-col justify-between items-center  rounded-md border-2 border-dashed border-accent p-5">
+      <div className="flex items-center h-full">
+        <div className="flex items-center space-x-2">
+          <Images />
+          <p>
+            Drag & drop images/folder or <BrowseButton />
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+export { Input, FileDropInput };

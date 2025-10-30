@@ -24,16 +24,23 @@ import { BoardItem, ImageSourceResponse } from "@/app/types";
 import { getPinsByBoardId } from "@/lib/api/pinterest/queries";
 import { getImagesFromResponse } from "@/components/drawing-session/helpers";
 import { BoardGroupSkeleton } from "@/components/ui/skeleton";
-import { Separator } from "../ui/separator";
 import { SectionHeading, SectionSubHeading } from "../ui/typography";
 import { ScrollArea } from "../ui/scroll-area";
 import { Switch } from "../ui/switch";
-import { Input } from "../ui/input";
-import { ImageSourceSelect, SessionTypeSelect } from "./select";
-import { Images } from "lucide-react";
+import { FileDropInput, Input } from "../ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { Label } from "../ui/label";
 import { Card, CardContent } from "../ui/card";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "../ui/label";
 
 const numericString = z.string().refine(
   (v) => {
@@ -87,28 +94,61 @@ export function SessionConfig(props: SessionConfigProps) {
     ImageSourceType.LOCAL,
   );
 
-  function PinterestBoardInput() {
+  function DialogDemo() {
     return (
-      <ScrollArea className="h-[420px]">
-        <Suspense fallback={<BoardGroupSkeleton />}>
-          <div className="">
-            <FormField
-              control={form.control}
-              name="boardId"
-              render={({ field }) => (
-                <FormItem>
-                  <BoardGroup
-                    boardsPromise={boardsPromise}
-                    value={field.value}
-                    onValueChangeAction={field.onChange}
+      <Dialog>
+        <div>
+          <DialogTrigger asChild>
+            <Button variant="outline">Choose Board</Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Choose Board</DialogTitle>
+            </DialogHeader>
+            <ScrollArea className="h-[420px]">
+              <Suspense fallback={<BoardGroupSkeleton />}>
+                <div className="">
+                  <FormField
+                    control={form.control}
+                    name="boardId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <BoardGroup
+                          boardsPromise={boardsPromise}
+                          value={field.value}
+                          onValueChangeAction={field.onChange}
+                        />
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </Suspense>
-      </ScrollArea>
+                </div>
+              </Suspense>
+            </ScrollArea>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline">Cancel</Button>
+              </DialogClose>
+              <Button type="submit">Save changes</Button>
+            </DialogFooter>
+          </DialogContent>
+        </div>
+      </Dialog>
+    );
+  }
+  function PinterestImageInputField() {
+    return (
+      <FormRow>
+        <div className="flex flex-col flex-3 gap-1">
+          <FormLabel>Board</FormLabel>
+          <FormDescription>
+            The Pinterest board containing the reference images
+          </FormDescription>
+        </div>
+        <div className="flex-1">
+          <DialogDemo />
+        </div>
+      </FormRow>
     );
   }
 
@@ -272,62 +312,16 @@ export function SessionConfig(props: SessionConfigProps) {
   );
 }
 
-function PinterestImageInputField() {
-  return (
-    <FormRow>
-      <div className="flex flex-col flex-3 gap-1">
-        <FormLabel>Board</FormLabel>
-        <FormDescription>
-          The Pinterest board containing the reference images
-        </FormDescription>
-      </div>
-      <div className="flex-1">
-        <Button variant="outline" type="button">
-          Choose Board
-        </Button>
-      </div>
-    </FormRow>
-  );
-}
 function LocalImageInputField() {
   return (
-    <FormRow>
-      <div className="flex flex-col flex-3 gap-1">
+    <FormItem className="py-3">
+      <div className="flex gap-1">
         <FormLabel>Image Files</FormLabel>
         <FormDescription>
           The reference images to use during the session
         </FormDescription>
       </div>
-      <div className="flex-1">
-        <Input type="file" multiple accept="image/*" />
-      </div>
-    </FormRow>
+      <FileDropInput />
+    </FormItem>
   );
 }
-
-function LocalImageDropZone() {
-  return (
-    <div className="h-full w-full flex flex-col justify-between items-center bg-background rounded-md border border-dashed border-accent p-5">
-      <div className="flex items-center h-full">
-        <div className="flex items-center space-x-2">
-          <Images />
-          <p>Drag images or a folder here</p>
-        </div>
-      </div>
-
-      <div>
-        <div>OR</div>
-        <div>
-          <Input type="file" multiple accept="image/*" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// async function getFile() {
-//   // Open file picker and destructure the result the first handle
-//   const [fileHandle] = await window.showOpenFilePicker();
-//   const file = await fileHandle.getFile();
-//   return file;
-// }
