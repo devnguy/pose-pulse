@@ -41,6 +41,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "../ui/label";
+import { ChooseBoardDialog } from "./choose-board-dialog";
 
 const numericString = z.string().refine(
   (v) => {
@@ -80,7 +81,6 @@ export const DEFAULT_SECTION_CONFIG = {
 
 type SessionConfigProps = {
   boardsPromise: Promise<ImageSourceResponse<BoardItem>>;
-  // boardsPromise: ImageSourceResponse<BoardItem>;
 };
 
 export function SessionConfig(props: SessionConfigProps) {
@@ -93,64 +93,6 @@ export function SessionConfig(props: SessionConfigProps) {
   const [imageSourceType, setImageSourceType] = useState<ImageSourceType>(
     ImageSourceType.LOCAL,
   );
-
-  function DialogDemo() {
-    return (
-      <Dialog>
-        <div>
-          <DialogTrigger asChild>
-            <Button variant="outline">Choose Board</Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Choose Board</DialogTitle>
-            </DialogHeader>
-            <ScrollArea className="h-[420px]">
-              <Suspense fallback={<BoardGroupSkeleton />}>
-                <div className="">
-                  <FormField
-                    control={form.control}
-                    name="boardId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <BoardGroup
-                          boardsPromise={boardsPromise}
-                          value={field.value}
-                          onValueChangeAction={field.onChange}
-                        />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </Suspense>
-            </ScrollArea>
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button variant="outline">Cancel</Button>
-              </DialogClose>
-              <Button type="submit">Save changes</Button>
-            </DialogFooter>
-          </DialogContent>
-        </div>
-      </Dialog>
-    );
-  }
-  function PinterestImageInputField() {
-    return (
-      <FormRow>
-        <div className="flex flex-col flex-3 gap-1">
-          <FormLabel>Board</FormLabel>
-          <FormDescription>
-            The Pinterest board containing the reference images
-          </FormDescription>
-        </div>
-        <div className="flex-1">
-          <DialogDemo />
-        </div>
-      </FormRow>
-    );
-  }
 
   const form = useForm<SessionConfigFormSchema>({
     resolver: zodResolver(FormSchema),
@@ -232,7 +174,18 @@ export function SessionConfig(props: SessionConfigProps) {
             <TabsContent value={ImageSourceType.PINTEREST}>
               <Card className="p-0">
                 <CardContent>
-                  <PinterestImageInputField />
+                  <FormRow>
+                    <div className="flex flex-col flex-3 gap-1">
+                      <FormLabel>Board</FormLabel>
+                      <FormDescription>
+                        The Pinterest board containing the reference images
+                      </FormDescription>
+                    </div>
+                    <ChooseBoardDialog
+                      boardsPromise={boardsPromise}
+                      control={form.control}
+                    />
+                  </FormRow>
                 </CardContent>
               </Card>
             </TabsContent>
