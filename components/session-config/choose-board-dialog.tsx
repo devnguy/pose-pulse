@@ -11,7 +11,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Suspense, useState } from "react";
-import { FormField, FormItem, FormMessage } from "../ui/form";
 import { BoardGroup } from "../image-group";
 import { BoardGroupSkeleton } from "../ui/skeleton";
 import { BoardItem, ImageSourceResponse } from "@/app/types";
@@ -23,27 +22,30 @@ type ChooseBoardDialogProps = {
   boardsPromise: Promise<ImageSourceResponse<BoardItem>>;
 };
 
-export type Board = {
-  id: string;
-  name: string;
-  count: number;
-};
-
+/**
+ * This component must keep track of 2 separate board states:
+ * 1. The selectedBoard form value
+ * 2. The board input
+ * The board input will change with UI interaction, and will replace the
+ * selectedBoard form value when the user clicks "done" in the dialog. After
+ * making changes, if the user clicks cancel, or closes the dialog, their
+ * selection will be discarded.
+ */
 export function ChooseBoardDialog(props: ChooseBoardDialogProps) {
   const { boardsPromise } = props;
-  const { control } = useFormContext<SessionConfigFormSchema>();
-  const [board, setBoard] = useState<Board>();
+  const { setValue } = useFormContext<SessionConfigFormSchema>();
+
+  const [selectedBoard, setSelectedBoard] = useState<BoardItem>();
+  const [selectedBoardInput, setSelectedBoardInput] = useState<BoardItem>();
+
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   return (
-    <Dialog>
-      {board && (
-        <p>
-          {board.name} ({board.count} pins)
-        </p>
-      )}
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        {board ? (
-          <Button variant="ghost" size="icon">
+        {selectedBoard ? (
+          <Button variant="ghost">
+            {`${selectedBoard.name} (${selectedBoard.pin_count} pins)`}
             <SquarePen />
           </Button>
         ) : (
@@ -57,35 +59,33 @@ export function ChooseBoardDialog(props: ChooseBoardDialogProps) {
         </DialogHeader>
         <ScrollArea className="h-[420px]">
           <Suspense fallback={<BoardGroupSkeleton />}>
-            <div className="">
-              <FormField
-                control={control}
-                name="boardId"
-                render={({ field }) => {
-                  const onValueChangeAction = (board: Board) => {
-                    field.onChange(board.id);
-                    setBoard(board);
-                  };
-
-                  return (
-                    <FormItem>
-                      <BoardGroup
-                        boardsPromise={boardsPromise}
-                        onValueChangeAction={onValueChangeAction}
-                      />
-                      <FormMessage />
-                    </FormItem>
-                  );
-                }}
-              />
-            </div>
+            <BoardGroup
+              boardsPromise={boardsPromise}
+              defaultSelected={selectedBoardInput}
+              onValueChangeAction={(board: BoardItem) => {
+                console.log("onchangeaction", board);
+                setSelectedBoardInput(board);
+              }}
+            />
           </Suspense>
         </ScrollArea>
         <DialogFooter>
           <DialogClose asChild>
             <Button variant="outline">Cancel</Button>
           </DialogClose>
-          <Button type="submit">Done</Button>
+          <Button
+            onClick={() => {
+              // Commit the input to the form
+              if (selectedBoardInput) {
+                setSelectedBoard(selectedBoardInput);
+                setValue("boardId", selectedBoardInput.id);
+                setSelectedBoardInput(selectedBoard);
+              }
+              setIsOpen(false);
+            }}
+          >
+            Done
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

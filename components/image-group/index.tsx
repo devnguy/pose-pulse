@@ -3,26 +3,29 @@
 import Image from "next/image";
 import { ExtraSmall, SectionHeading } from "@/components/ui/typography";
 import { Button } from "../ui/button";
-import { use } from "react";
+import { use, useState } from "react";
 import { BoardItem, ImageSourceResponse } from "@/app/types";
 import { formatDistanceToNowShort } from "@/lib/utils";
 import { useFormContext } from "react-hook-form";
 import { SessionConfigFormSchema } from "../session-config";
-import { Board } from "../session-config/choose-board-dialog";
 
 type BoardGroupProps = {
-  onValueChangeAction: (v: Board) => void;
   boardsPromise: Promise<ImageSourceResponse<BoardItem>>;
+  onValueChangeAction: (v: BoardItem) => void;
+  defaultSelected?: BoardItem;
 };
 
 type BoardCardProps = {
   board: BoardItem;
   onClickAction: () => void;
+  isSelected: boolean;
 };
 
 export function BoardGroup(props: BoardGroupProps): React.ReactElement {
-  const { onValueChangeAction, boardsPromise } = props;
+  const { boardsPromise, onValueChangeAction, defaultSelected } = props;
   const boards = use(boardsPromise);
+
+  const [selected, setSelected] = useState<BoardItem>();
 
   return (
     <div className="flex justify-center w-full">
@@ -32,13 +35,11 @@ export function BoardGroup(props: BoardGroupProps): React.ReactElement {
             key={board.id}
             board={board}
             onClickAction={() => {
-              onValueChangeAction({
-                id: board.id,
-                name: board.name,
-                count: board.pin_count,
-              });
-              // onValueChangeAction(board.id)
+              onValueChangeAction(board);
             }}
+            isSelected={
+              defaultSelected && board.id === defaultSelected.id ? true : false
+            }
           />
         ))}
       </div>
@@ -47,9 +48,7 @@ export function BoardGroup(props: BoardGroupProps): React.ReactElement {
 }
 
 export default function BoardGroupItem(props: BoardCardProps) {
-  const { onClickAction, board } = props;
-  const { getValues } = useFormContext<SessionConfigFormSchema>();
-  const isSelected = getValues("boardId") === board.id;
+  const { onClickAction, board, isSelected } = props;
 
   const cover = board.media.image_cover_url;
   const thumbnails = board.media.pin_thumbnail_urls;
