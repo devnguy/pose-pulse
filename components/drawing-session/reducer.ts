@@ -4,8 +4,7 @@ import {
   Reference,
 } from "@/components/drawing-session/types";
 
-import { SessionConfigFormSchema } from "@/components/session-config";
-import { ImageSourceResponse, Pin } from "@/app/types";
+import { SessionSection } from "@/components/session-config";
 export type DrawingSessionAction =
   | DrawingSessionActionInit
   | DrawingSessionActionForward
@@ -16,7 +15,9 @@ export type DrawingSessionAction =
 
 type DrawingSessionActionInit = {
   type: "INIT";
-  payload: SessionConfigFormSchema & {
+  payload: {
+    boardId: string;
+    sections: Array<SessionSection>;
     images: Array<string>;
   };
 };

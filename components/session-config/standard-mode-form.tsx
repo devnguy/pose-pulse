@@ -17,7 +17,7 @@ export function StandardModeForm() {
     <div className="flex flex-col w-full">
       <FormField
         control={control}
-        name={`sections.0.count` as const}
+        name="standardModeInput.count"
         render={({ field }) => (
           <FormRow>
             <div className="flex flex-col flex-3 gap-1">
@@ -39,7 +39,7 @@ export function StandardModeForm() {
       <Separator />
       <FormField
         control={control}
-        name={`sections.0.interval` as const}
+        name="standardModeInput.interval"
         render={({ field }) => (
           <FormRow>
             <div className="flex flex-col flex-3 gap-1">

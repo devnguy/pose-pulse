@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormDescription,
+  FormField,
   FormItem,
   FormLabel,
   FormRow,
@@ -15,7 +16,7 @@ import {
 import { useDrawingSessionContext } from "@/components/drawing-session/context";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ClassModeForm } from "@/components//session-config/class-mode-form";
+import { CustomModeForm } from "@/components//session-config/custom-mode-form";
 import { StandardModeForm } from "@/components//session-config/standard-mode-form";
 import { BoardItem, ImageSourceResponse } from "@/app/types";
 import { getPinsByBoardId } from "@/lib/api/pinterest/queries";
@@ -26,26 +27,8 @@ import { FileDropInput } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChooseBoardDialog } from "@/components/session-config/choose-board-dialog";
-
-const numericString = z.string().refine(
-  (v) => {
-    const n = Number(v);
-    return !isNaN(n) && v?.length > 0;
-  },
-  { message: "Invalid number" },
-);
-
-const FormSchema = z.object({
-  boardId: z.string(),
-  sections: z.array(
-    z.object({
-      count: numericString,
-      interval: numericString,
-    }),
-  ),
-});
-
-export type SessionConfigFormSchema = z.infer<typeof FormSchema>;
+import { ClassModeForm, ClassPreset } from "./class-mode-form";
+import { getClassModeValueFromPreset } from "./class-preset-map";
 
 export enum SessionType {
   STANDARD = "STANDARD",
@@ -58,6 +41,37 @@ export enum ImageSourceType {
   LOCAL = "LOCAL",
 }
 
+const numericString = z.string().refine(
+  (v) => {
+    const n = Number(v);
+    return !isNaN(n) && v?.length > 0;
+  },
+  { message: "Invalid number" },
+);
+
+export type SessionSection = {
+  count: string;
+  interval: string;
+};
+
+const FormSchema = z.object({
+  boardId: z.string(),
+  sessionType: z.enum(SessionType),
+  standardModeInput: z.object({
+    count: numericString,
+    interval: numericString,
+  }),
+  classModeInput: z.enum(ClassPreset),
+  customModeInput: z.array(
+    z.object({
+      count: numericString,
+      interval: numericString,
+    }),
+  ),
+});
+
+export type SessionConfigFormSchema = z.infer<typeof FormSchema>;
+
 export const DEFAULT_SECTION_CONFIG = {
   count: "10",
   interval: "30",
@@ -67,59 +81,74 @@ type SessionConfigProps = {
   boardsPromise: Promise<ImageSourceResponse<BoardItem>>;
 };
 
+const defaultValues = {
+  sessionType: SessionType.STANDARD,
+  standardModeInput: DEFAULT_SECTION_CONFIG,
+  classModeInput: ClassPreset.THIRTY_MIN,
+  // temporary values for easier testing
+  customModeInput: [
+    {
+      count: "5",
+      interval: "30",
+    },
+    {
+      count: "10",
+      interval: "60",
+    },
+    {
+      count: "15",
+      interval: "90",
+    },
+    {
+      count: "20",
+      interval: "180",
+    },
+    {
+      count: "30",
+      interval: "300",
+    },
+    {
+      count: "50",
+      interval: "600",
+    },
+  ],
+};
+
 export function SessionConfig(props: SessionConfigProps) {
   const { boardsPromise } = props;
   const router = useRouter();
   const { state, dispatch } = useDrawingSessionContext();
-  const [sessionType, setSessionType] = useState<SessionType>(
-    SessionType.STANDARD,
-  );
+  // const [sessionType, setSessionType] = useState<SessionType>(
+  //   SessionType.CLASS,
+  // );
 
   const form = useForm<SessionConfigFormSchema>({
     resolver: zodResolver(FormSchema),
-    defaultValues: {
-      // sections: [DEFAULT_SECTION_CONFIG],
-      sections: [
-        {
-          count: "5",
-          interval: "30",
-        },
-        {
-          count: "10",
-          interval: "60",
-        },
-        {
-          count: "15",
-          interval: "90",
-        },
-        {
-          count: "20",
-          interval: "180",
-        },
-        {
-          count: "30",
-          interval: "300",
-        },
-        {
-          count: "50",
-          interval: "600",
-        },
-      ],
-    },
+    defaultValues,
   });
 
-  async function onSubmit(data: SessionConfigFormSchema) {
-    // remove any form changes from class mode
-    if (sessionType === SessionType.STANDARD) {
-      data.sections = data.sections.slice(0, 1);
+  const getSectionsFromFormData = (
+    formData: SessionConfigFormSchema,
+  ): Array<SessionSection> => {
+    if (formData.sessionType === SessionType.STANDARD) {
+      return [formData.standardModeInput];
     }
+    if (formData.sessionType === SessionType.CLASS) {
+      return getClassModeValueFromPreset(formData.classModeInput);
+    }
+    return formData.customModeInput;
+  };
+
+  async function onSubmit(data: SessionConfigFormSchema) {
+    console.log({ data });
+    const sections = getSectionsFromFormData(data);
 
     const response = await getPinsByBoardId(data.boardId);
     const images = getImagesFromResponse(response);
 
     dispatch({
       type: "INIT",
-      payload: { ...data, images },
+      payload: { sections, boardId: data.boardId, images },
     });
 
     router.push("/app/session");
@@ -175,35 +204,46 @@ export function SessionConfig(props: SessionConfigProps) {
 
         <div className="flex flex-col gap-2">
           <SectionSubHeading>Session Type</SectionSubHeading>
-          <Tabs defaultValue={SessionType.STANDARD}>
-            <TabsList>
-              <TabsTrigger value={SessionType.STANDARD}>Standard</TabsTrigger>
-              <TabsTrigger value={SessionType.CLASS}>Class</TabsTrigger>
-              <TabsTrigger value={SessionType.CUSTOM}>Custom</TabsTrigger>
-            </TabsList>
+          <FormField
+            control={form.control}
+            name="sessionType"
+            render={({ field }) => (
+              <Tabs
+                defaultValue={defaultValues.sessionType}
+                onValueChange={field.onChange}
+              >
+                <TabsList>
+                  <TabsTrigger value={SessionType.STANDARD}>
+                    Standard
+                  </TabsTrigger>
+                  <TabsTrigger value={SessionType.CLASS}>Class</TabsTrigger>
+                  <TabsTrigger value={SessionType.CUSTOM}>Custom</TabsTrigger>
+                </TabsList>
 
-            <TabsContent value={SessionType.STANDARD}>
-              <Card className="p-0">
-                <CardContent>
-                  <StandardModeForm />
-                </CardContent>
-              </Card>
-            </TabsContent>
-            <TabsContent value={SessionType.CLASS}>
-              <Card className="p-0">
-                <CardContent>
-                  <ClassModeForm />
-                </CardContent>
-              </Card>
-            </TabsContent>
-            <TabsContent value={SessionType.CUSTOM}>
-              <Card className="p-0">
-                <CardContent>
-                  <ClassModeForm />
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                <TabsContent value={SessionType.STANDARD}>
+                  <Card className="p-0">
+                    <CardContent>
+                      <StandardModeForm />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+                <TabsContent value={SessionType.CLASS}>
+                  <Card className="p-0">
+                    <CardContent>
+                      <ClassModeForm />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+                <TabsContent value={SessionType.CUSTOM}>
+                  <Card className="p-0">
+                    <CardContent>
+                      <CustomModeForm />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            )}
+          />
         </div>
 
         <div className="flex flex-col gap-2">

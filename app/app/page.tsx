@@ -1,6 +1,5 @@
 import { Header } from "@/components/header";
 import { SessionConfig } from "@/components/session-config";
-import { Card, CardContent } from "@/components/ui/card";
 import { H1 } from "@/components/ui/typography";
 import { getBoards } from "@/lib/api/pinterest/queries";
 
