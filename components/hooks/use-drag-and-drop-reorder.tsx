@@ -12,6 +12,7 @@ import {
   extractClosestEdge,
 } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
 import { triggerPostMoveFlash } from "@atlaskit/pragmatic-drag-and-drop-flourish/trigger-post-move-flash";
+import { preventUnhandled } from "@atlaskit/pragmatic-drag-and-drop/prevent-unhandled";
 import invariant from "tiny-invariant";
 import * as ReactDOM from "react-dom";
 
@@ -81,6 +82,7 @@ export function useDragAndDropReorder<Item>(
           });
         },
         onDragStart({ source }) {
+          preventUnhandled.start();
           source.element.style.opacity = "0.4";
           setDragAndDropState({ type: "preview", container: source.element });
         },
