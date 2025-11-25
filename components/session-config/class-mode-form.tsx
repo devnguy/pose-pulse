@@ -13,6 +13,7 @@ import {
 } from "../ui/form";
 import { ClassPresetSelect } from "./select";
 import { getClassModeValueFromPreset } from "./class-preset-map";
+import { getIntervalLabel } from "@/lib/utils";
 
 export enum ClassPreset {
   THIRTY_MIN = "THIRTY_MIN",
@@ -62,7 +63,7 @@ export function ClassModeForm() {
             {presetValues.map((section, index) => (
               <li
                 key={index}
-              >{`${getIntervalLabel(section.interval)} x ${section.count}`}</li>
+              >{`${section.count} x ${getIntervalLabel(section.interval)}`}</li>
             ))}
           </ul>
         </div>
@@ -70,17 +71,3 @@ export function ClassModeForm() {
     </div>
   );
 }
-
-const getIntervalLabel = (interval: string): string => {
-  const n = Number(interval);
-  if (isNaN(n)) {
-    return "";
-  }
-  if (n / 60 < 1) {
-    return `${n} seconds`;
-  }
-  if (n / 60 === 1) {
-    return `1 minute`;
-  }
-  return `${n / 60} minutes`;
-};

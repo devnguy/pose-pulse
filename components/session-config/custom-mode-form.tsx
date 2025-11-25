@@ -27,14 +27,16 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "../ui/table";
 import { useCallback, useState } from "react";
-import { cn } from "@/lib/utils";
+import { cn, getIntervalLabel } from "@/lib/utils";
 import { DropIndicator } from "@atlaskit/pragmatic-drag-and-drop-react-drop-indicator/box";
 import { useDragAndDropReorder } from "@/components/hooks/use-drag-and-drop-reorder";
+import ReactDOM from "react-dom";
 
 type SectionRowProps = {
   index: number;
@@ -73,7 +75,7 @@ export function CustomModeForm() {
         <TableHeader>
           <TableRow className="border-none hover:bg-transparent">
             <TableHead className="w-0 p-0" />
-            <TableHead>Number of Images</TableHead>
+            <TableHead className="pl-0">Number of Images</TableHead>
             <TableHead>Interval</TableHead>
             <TableHead className="w-0 p-0" />
           </TableRow>
@@ -85,6 +87,7 @@ export function CustomModeForm() {
             );
           })}
         </TableBody>
+        <TableFooter className="h-1.5" />
       </Table>
     </div>
   );
@@ -112,11 +115,14 @@ function SectionRow(props: SectionRowProps) {
     [move],
   );
 
-  const { ref, dragHandleRef, dragAndDropState } = useDragAndDropReorder({
-    index,
-    item: fields[index],
-    move: handleMove,
-  });
+  const item = fields[index];
+
+  const { ref, dragHandleRef, dragAndDropState, Preview } =
+    useDragAndDropReorder({
+      index,
+      item,
+      move: handleMove,
+    });
 
   const isSingle = fields.length === 1;
 
@@ -148,7 +154,7 @@ function SectionRow(props: SectionRowProps) {
           variant={"ghost"}
           size="icon"
           className={cn(
-            "absolute -left-4.5 top-3 hover:cursor-grab w-6 h-6 hover:bg-transparent transition-none",
+            "absolute -left-5.5 top-2.5 hover:cursor-grab w-6 h-6 hover:bg-transparent transition-none",
             !shouldShowControls && "opacity-0",
             isSingle && "hidden",
           )}
@@ -161,7 +167,7 @@ function SectionRow(props: SectionRowProps) {
           />
         </Button>
       </TableCell>
-      <TableCell>
+      <TableCell className="pl-0 pr-1.5">
         <FormField
           control={control}
           name={`customModeInput.${index}.count` as const}
@@ -176,7 +182,7 @@ function SectionRow(props: SectionRowProps) {
           )}
         />
       </TableCell>
-      <TableCell>
+      <TableCell className="pr-0">
         <FormField
           control={control}
           name={`customModeInput.${index}.interval` as const}
@@ -191,19 +197,19 @@ function SectionRow(props: SectionRowProps) {
           )}
         />
       </TableCell>
-      <TableCell className="p-0 w-6">
+      <TableCell className="w-0 p-0">
         <Button
           variant="ghost"
           size="icon"
           className={cn(
-            "p-0 w-6 h-6 transition-none",
+            "absolute -right-5.5 top-2.5 w-6 h-6 hover:bg-transparent transition-none",
             !shouldShowControls && "opacity-0",
             isSingle && "hidden",
           )}
           onClick={handleRemove}
           type="button"
         >
-          <X />
+          <X className="text-[#9D9D9F]" />
         </Button>
         {dragAndDropState.type === "is-over" && dragAndDropState.closestEdge ? (
           <DropIndicator
@@ -211,6 +217,9 @@ function SectionRow(props: SectionRowProps) {
             type="terminal-no-bleed"
           />
         ) : null}
+        <Preview
+          content={`${item.count} x ${getIntervalLabel(item.interval)}`}
+        />
       </TableCell>
     </TableRow>
   );

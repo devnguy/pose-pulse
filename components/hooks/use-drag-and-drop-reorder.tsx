@@ -1,9 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import {
   draggable,
   dropTargetForElements,
 } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import { pointerOutsideOfPreview } from "@atlaskit/pragmatic-drag-and-drop/element/pointer-outside-of-preview";
+import { setCustomNativeDragPreview } from "@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview";
 import {
   attachClosestEdge,
   type Edge,
@@ -11,6 +13,7 @@ import {
 } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
 import { triggerPostMoveFlash } from "@atlaskit/pragmatic-drag-and-drop-flourish/trigger-post-move-flash";
 import invariant from "tiny-invariant";
+import * as ReactDOM from "react-dom";
 
 type DragAndDropState =
   | {
@@ -18,6 +21,7 @@ type DragAndDropState =
     }
   | {
       type: "preview";
+      container: HTMLElement;
     }
   | {
       type: "is-over";
@@ -63,10 +67,25 @@ export function useDragAndDropReorder<Item>(
             index,
           };
         },
-        onDragStart() {
-          setDragAndDropState({ type: "preview" });
+        onGenerateDragPreview({ nativeSetDragImage }) {
+          setCustomNativeDragPreview({
+            render: ({ container }) => {
+              setDragAndDropState({ type: "preview", container });
+              return () => setDragAndDropState({ type: "idle" });
+            },
+            nativeSetDragImage,
+            getOffset: pointerOutsideOfPreview({
+              x: "16px",
+              y: "8px",
+            }),
+          });
         },
-        onDrop() {
+        onDragStart({ source }) {
+          source.element.style.opacity = "0.4";
+          setDragAndDropState({ type: "preview", container: source.element });
+        },
+        onDrop({ source }) {
+          source.element.style.opacity = "1";
           setDragAndDropState({ type: "idle" });
         },
       }),
@@ -150,9 +169,17 @@ export function useDragAndDropReorder<Item>(
     );
   }, [item, index, move, dragAndDropState]);
 
+  const Preview = ({ content }: { content: string }) =>
+    dragAndDropState.type === "preview" &&
+    ReactDOM.createPortal(
+      <div className="bg-white py-2 px-3">{content}</div>,
+      dragAndDropState.container,
+    );
+
   return {
     ref,
     dragHandleRef,
     dragAndDropState,
+    Preview,
   };
 }

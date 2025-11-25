@@ -27,3 +27,17 @@ export function formatDistanceToNowShort(date: string) {
 
   return strArray[0] + abbreviation;
 }
+
+export function getIntervalLabel(interval: string): string {
+  const n = Number(interval);
+  if (isNaN(n)) {
+    return "";
+  }
+  if (n / 60 < 1) {
+    return `${n} seconds`;
+  }
+  if (n / 60 === 1) {
+    return `1 minute`;
+  }
+  return `${n / 60} minutes`;
+}
