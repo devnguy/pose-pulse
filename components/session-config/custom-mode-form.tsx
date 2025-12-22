@@ -60,7 +60,7 @@ export function CustomModeForm() {
         <div className="flex flex-col flex-3 gap-1">
           <FormLabel>Custom Sections</FormLabel>
           <FormDescription>
-            Total number of images displayed during the session
+            Each image in a section is displayed for the same interval duration
           </FormDescription>
         </div>
         <div>

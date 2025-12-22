@@ -5,6 +5,8 @@ import { Controller } from "@/components/drawing-session/controller";
 import { CurrentImage } from "@/components/drawing-session/current-image";
 import { useDrawingSessionContext } from "@/components/drawing-session/context";
 import { Timer } from "@/components/drawing-session/timer";
+import { Button } from "../ui/button";
+import Link from "next/link";
 
 export default function DrawingSession() {
   const { state, dispatch } = useDrawingSessionContext();
@@ -17,7 +19,12 @@ export default function DrawingSession() {
     <div className="py-12 px-4 h-screen w-full">
       {state.isStopped ? (
         <div className="flex flex-col justify-center space-y-4 items-center h-full">
-          Done
+          <p className="">Session Complete</p>
+          <div>
+            <Link href={"/app"}>
+              <Button>Back</Button>
+            </Link>
+          </div>
         </div>
       ) : (
         <div className="flex flex-col justify-center space-y-4 items-center h-full">
