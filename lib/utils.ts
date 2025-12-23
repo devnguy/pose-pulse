@@ -1,4 +1,3 @@
-import { Time } from "@/components/drawing-session/types";
 import { clsx, type ClassValue } from "clsx";
 import { formatDistanceToNow } from "date-fns";
 import { twMerge } from "tailwind-merge";

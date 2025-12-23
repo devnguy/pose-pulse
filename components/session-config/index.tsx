@@ -11,11 +11,12 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
   FormRow,
 } from "@/components/ui/form";
 import { useDrawingSessionContext } from "@/components/drawing-session/context";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { CustomModeForm } from "@/components//session-config/custom-mode-form";
 import { StandardModeForm } from "@/components//session-config/standard-mode-form";
 import { BoardItem, ImageSourceResponse } from "@/app/types";
@@ -55,7 +56,7 @@ export type SessionSection = {
 };
 
 const FormSchema = z.object({
-  boardId: z.string(),
+  boardId: z.string("Board required"),
   sessionType: z.enum(SessionType),
   standardModeInput: z.object({
     count: numericString,
@@ -92,24 +93,12 @@ const defaultValues = {
       interval: "30",
     },
     {
-      count: "10",
+      count: "5",
       interval: "60",
     },
     {
-      count: "15",
+      count: "5",
       interval: "90",
-    },
-    {
-      count: "20",
-      interval: "180",
-    },
-    {
-      count: "30",
-      interval: "300",
-    },
-    {
-      count: "50",
-      interval: "600",
     },
   ],
 };
@@ -118,12 +107,10 @@ export function SessionConfig(props: SessionConfigProps) {
   const { boardsPromise } = props;
   const router = useRouter();
   const { state, dispatch } = useDrawingSessionContext();
-  // const [sessionType, setSessionType] = useState<SessionType>(
-  //   SessionType.CLASS,
-  // );
 
   const form = useForm<SessionConfigFormSchema>({
     resolver: zodResolver(FormSchema),
+    reValidateMode: "onBlur",
     defaultValues,
   });
 
@@ -144,6 +131,7 @@ export function SessionConfig(props: SessionConfigProps) {
     const sections = getSectionsFromFormData(data);
 
     const response = await getPinsByBoardId(data.boardId);
+    console.log({ bookmark: response.bookmark });
     const images = getImagesFromResponse(response);
 
     dispatch({
@@ -185,6 +173,12 @@ export function SessionConfig(props: SessionConfigProps) {
                       <FormDescription>
                         The Pinterest board containing the reference images
                       </FormDescription>
+                      <FormField
+                        name="boardId"
+                        // ChooseBoardDialog handles the rendering for this form field,
+                        // but we still need to display the error message
+                        render={() => <FormMessage />}
+                      />
                     </div>
                     {/* choose board button or chosen board */}
                     <ChooseBoardDialog boardsPromise={boardsPromise} />

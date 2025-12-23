@@ -30,10 +30,12 @@ type ChooseBoardDialogProps = {
  * selectedBoard form value when the user clicks "done" in the dialog. After
  * making changes, if the user clicks cancel, or closes the dialog, their
  * changes will be discarded.
+ * Because this isn't rendered using FormField.render, we manually set the
+ * form field value and manually clear the error
  */
 export function ChooseBoardDialog(props: ChooseBoardDialogProps) {
   const { boardsPromise } = props;
-  const { setValue } = useFormContext<SessionConfigFormSchema>();
+  const { setValue, clearErrors } = useFormContext<SessionConfigFormSchema>();
 
   const [selectedBoard, setSelectedBoard] = useState<BoardItem>();
   const [selectedBoardInput, setSelectedBoardInput] = useState<BoardItem>();
@@ -90,6 +92,7 @@ export function ChooseBoardDialog(props: ChooseBoardDialogProps) {
               // Commit the input to the form
               setIsOpen(false);
               if (selectedBoardInput) {
+                clearErrors("boardId");
                 setSelectedBoard(selectedBoardInput);
                 setValue("boardId", selectedBoardInput.id);
               }
