@@ -42,16 +42,3 @@ export function getIntervalLabel(interval: string): string {
   }
   return `${n / 60} minutes`;
 }
-
-/**
- * Returns the given value of seconds in minutes and seconds
- */
-export function getTimeFromSeconds(value: number): Time {
-  const minutes = Math.floor(value / 60);
-  const seconds = value - 60 * minutes;
-
-  return {
-    minutes,
-    seconds,
-  };
-}
