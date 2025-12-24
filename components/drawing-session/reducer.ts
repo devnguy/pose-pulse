@@ -7,6 +7,7 @@ import {
 import { SessionSection } from "@/components/session-config";
 export type DrawingSessionAction =
   | DrawingSessionActionInit
+  | DrawingSessionActionStartSession
   | DrawingSessionActionForward
   | DrawingSessionActionBack
   | DrawingSessionActionTogglePause
@@ -18,8 +19,10 @@ type DrawingSessionActionInit = {
   payload: {
     boardId: string;
     sections: Array<SessionSection>;
-    images: Array<string>;
   };
+};
+type DrawingSessionActionStartSession = {
+  type: "START_SESSION";
 };
 type DrawingSessionActionForward = {
   type: "FORWARD";
@@ -47,6 +50,8 @@ export function reducer(
   switch (action.type) {
     case "INIT":
       return init(state, action.payload);
+    case "START_SESSION":
+      return startSession(state);
     case "FORWARD":
       return forward(state);
     case "BACK":
@@ -62,7 +67,6 @@ export function reducer(
   }
 }
 
-// TODO: Does this function and its variable naming make sense?
 function init(
   state: DrawingSessionState,
   payload: DrawingSessionActionInit["payload"],
@@ -82,30 +86,45 @@ function init(
     };
   }, start);
 
+  return {
+    ...state,
+    current: undefined,
+    index: 0,
+    total: aggregate.total,
+    pool: {
+      images: [],
+      intervals: aggregate.intervals,
+    },
+    isStopped: false,
+    isPaused: false,
+    boardId: payload.boardId,
+  };
+}
+
+function startSession(state: DrawingSessionState): DrawingSessionState {
   // Take a new item from the pool
-  const randomIndex = getRandomInt(payload.images.length);
+  const randomIndex = getRandomInt(state.pool.images.length);
 
   const current: Reference = {
-    src: payload.images[randomIndex],
-    interval: aggregate.intervals[0],
+    src: state.pool.images[randomIndex],
+    interval: state.pool.intervals[0],
   };
   const history = [current];
 
   // Remove chosen items from the pool
   const newPool = {
-    images: payload.images.filter((_, i) => i !== randomIndex),
-    intervals: aggregate.intervals.slice(1),
+    images: state.pool.images.filter((_, i) => i !== randomIndex),
+    intervals: state.pool.intervals.slice(1),
   };
 
   return {
+    ...state,
     index: 0,
-    total: aggregate.total,
     history,
     pool: newPool,
     isStopped: false,
     isPaused: false,
     current,
-    boardId: payload.boardId,
   };
 }
 

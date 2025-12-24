@@ -16,12 +16,9 @@ import {
 } from "@/components/ui/form";
 import { useDrawingSessionContext } from "@/components/drawing-session/context";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { CustomModeForm } from "@/components//session-config/custom-mode-form";
 import { StandardModeForm } from "@/components//session-config/standard-mode-form";
 import { BoardItem, ImageSourceResponse } from "@/app/types";
-import { getPinsByBoardId } from "@/lib/api/pinterest/queries";
-import { getImagesFromResponse } from "@/components/drawing-session/helpers";
 import { SectionHeading, SectionSubHeading } from "../ui/typography";
 import { Switch } from "@/components/ui/switch";
 import { FileDropInput } from "@/components/ui/input";
@@ -106,7 +103,7 @@ const defaultValues = {
 export function SessionConfig(props: SessionConfigProps) {
   const { boardsPromise } = props;
   const router = useRouter();
-  const { state, dispatch } = useDrawingSessionContext();
+  const { dispatch } = useDrawingSessionContext();
 
   const form = useForm<SessionConfigFormSchema>({
     resolver: zodResolver(FormSchema),
@@ -130,23 +127,13 @@ export function SessionConfig(props: SessionConfigProps) {
     // console.log({ data });
     const sections = getSectionsFromFormData(data);
 
-    const response = await getPinsByBoardId(data.boardId);
-    const bookmark = response.bookmark;
-    const images = getImagesFromResponse(response);
-
     dispatch({
       type: "INIT",
-      payload: { sections, boardId: data.boardId, images },
+      payload: { sections, boardId: data.boardId },
     });
 
-    const searchParams = bookmark ? `?cursor=${bookmark}` : "";
-
-    router.push(`/app/session${searchParams}`);
+    router.push(`/app/session`);
   }
-
-  // useEffect(() => {
-  //   console.log({ state });
-  // }, [state]);
 
   return (
     <Form {...form}>

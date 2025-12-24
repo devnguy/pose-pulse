@@ -86,6 +86,6 @@ export const getBoards = cache(
   },
 );
 
-async function slow(time: number = 2500) {
-  return new Promise((resolve) => setTimeout(resolve, time));
-}
+// async function slow(time: number = 2500) {
+//   return new Promise((resolve) => setTimeout(resolve, time));
+// }

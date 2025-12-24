@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { Controller } from "@/components/drawing-session/controller";
 import { CurrentImage } from "@/components/drawing-session/current-image";
 import { useDrawingSessionContext } from "@/components/drawing-session/context";
@@ -10,15 +10,14 @@ import Link from "next/link";
 import useSWRInfinite, { SWRInfiniteKeyLoader } from "swr/infinite";
 import { fetcher } from "@/lib/api/pinterest/queries";
 import { ImageSourceResponse, Pin } from "@/app/types";
+import { getImagesFromResponse } from "./helpers";
 
-// boardId: 136445132399848892
 const getKey =
   (boardId: string | undefined): SWRInfiniteKeyLoader =>
   (pageIndex: number, previousPageData: ImageSourceResponse<Pin>) => {
-    console.log("getKey", boardId, pageIndex, previousPageData);
     // first page, we don't have `previousPageData`
     if (pageIndex === 0) {
-      return `https://api.pinterest.com/v5/boards/${boardId}/pins?page_size=25`;
+      return `https://api.pinterest.com/v5/boards/${boardId}/pins?page_size=250`;
     }
 
     // reached the end
@@ -27,27 +26,49 @@ const getKey =
       return null;
     }
 
-    return `https://api.pinterest.com/v5/boards/${boardId}/pins?page_size=25&bookmark=${previousPageData.bookmark}`;
+    return `https://api.pinterest.com/v5/boards/${boardId}/pins?page_size=250&bookmark=${previousPageData.bookmark}`;
   };
 
 export default function DrawingSession() {
   const { state, dispatch } = useDrawingSessionContext();
 
-  const { data, isLoading, error } = useSWRInfinite(
-    getKey(state.boardId),
-    fetcher,
-    {
-      initialSize: 5,
-    },
-  );
+  const { data, error } = useSWRInfinite(getKey(state.boardId), fetcher, {
+    initialSize: 5,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+  });
 
   if (error) {
     console.log(error);
   }
 
+  const processedPagesRef = useRef(0);
+  const sessionStartedRef = useRef(false);
+
   useEffect(() => {
-    console.log({ data, isLoading, error });
-  }, [data, isLoading, error]);
+    if (!data) return;
+
+    // Add only new pages
+    if (data.length > processedPagesRef.current) {
+      const newPages = data.slice(processedPagesRef.current);
+
+      for (const page of newPages) {
+        dispatch({
+          type: "ADD_TO_IMAGE_POOL",
+          payload: {
+            images: getImagesFromResponse(page),
+          },
+        });
+      }
+
+      processedPagesRef.current = data.length;
+    }
+    // Start session once
+    if (!sessionStartedRef.current && data.length > 0) {
+      dispatch({ type: "START_SESSION" });
+      sessionStartedRef.current = true;
+    }
+  }, [data, dispatch]);
 
   const handleForward = useCallback(() => {
     dispatch({ type: "FORWARD" });
@@ -64,6 +85,8 @@ export default function DrawingSession() {
             </Link>
           </div>
         </div>
+      ) : !state.current ? (
+        <div>Loading</div>
       ) : (
         <div className="flex flex-col justify-center space-y-4 items-center h-full">
           <div className="relative w-full h-[80vh] flex items-center justify-center">
