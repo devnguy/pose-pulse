@@ -28,6 +28,7 @@ export function StandardModeForm() {
             </div>
             <div className="flex-1">
               <CountSelect
+                name="standardModeInput.count"
                 onValueChange={field.onChange}
                 defaultValue={field.value}
               />
@@ -50,6 +51,7 @@ export function StandardModeForm() {
             </div>
             <div className="flex-1">
               <IntervalSelect
+                name="standardModeInput.interval"
                 onValueChange={field.onChange}
                 defaultValue={field.value}
               />

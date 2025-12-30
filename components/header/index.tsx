@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { H3 } from "@/components/ui/typography";
-import { Eclipse, NotebookPen } from "lucide-react";
+import { Eclipse } from "lucide-react";
 import { auth, signIn, signOut } from "@/auth";
 import {
   NavigationMenu,

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Coins, FileText, Lock } from "lucide-react";
+import { CodeXml, Coins, FileText, Lock } from "lucide-react";
 
 export function Footer() {
   return (
@@ -27,6 +27,14 @@ export function Footer() {
               <Lock size={16} />
             </div>
             <div>Privacy</div>
+          </div>
+        </Link>
+        <Link href="/app" className="hover:bg-accent">
+          <div className="text-xs flex space-x-1 items-center h-6 px-3 rounded-md">
+            <div>
+              <CodeXml size={16} />
+            </div>
+            <div>Github</div>
           </div>
         </Link>
       </div>

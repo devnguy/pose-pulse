@@ -27,6 +27,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ChooseBoardDialog } from "@/components/session-config/choose-board-dialog";
 import { ClassModeForm, ClassPreset } from "./class-mode-form";
 import { getClassModeValueFromPreset } from "./class-preset-map";
+import { useSession } from "next-auth/react";
+import { LoginButton } from "./login-button";
 
 export enum SessionType {
   STANDARD = "STANDARD",
@@ -104,6 +106,7 @@ export function SessionConfig(props: SessionConfigProps) {
   const { boardsPromise } = props;
   const router = useRouter();
   const { dispatch } = useDrawingSessionContext();
+  const { data: session } = useSession();
 
   const form = useForm<SessionConfigFormSchema>({
     resolver: zodResolver(FormSchema),
@@ -158,7 +161,7 @@ export function SessionConfig(props: SessionConfigProps) {
                 <CardContent>
                   <FormRow>
                     <div className="flex flex-col flex-3 gap-1">
-                      <FormLabel>Board</FormLabel>
+                      <FormLabel htmlFor="boardId">Board</FormLabel>
                       <FormDescription>
                         The Pinterest board containing the reference images
                       </FormDescription>
@@ -169,8 +172,12 @@ export function SessionConfig(props: SessionConfigProps) {
                         render={() => <FormMessage />}
                       />
                     </div>
-                    {/* choose board button or chosen board */}
-                    <ChooseBoardDialog boardsPromise={boardsPromise} />
+                    {!session?.user ? (
+                      <LoginButton />
+                    ) : (
+                      // choose board button or chosen board
+                      <ChooseBoardDialog boardsPromise={boardsPromise} />
+                    )}
                   </FormRow>
                 </CardContent>
               </Card>
@@ -235,13 +242,13 @@ export function SessionConfig(props: SessionConfigProps) {
             <CardContent>
               <FormRow>
                 <div className="flex flex-col flex-3 gap-1">
-                  <FormLabel>Hard Mode</FormLabel>
+                  <FormLabel htmlFor="hardMode">Hard Mode</FormLabel>
                   <FormDescription>
                     Disable pause, back, and skip controls during the session
                   </FormDescription>
                 </div>
                 <div>
-                  <Switch />
+                  <Switch id="hardMode" name="hardMode" />
                 </div>
               </FormRow>
             </CardContent>

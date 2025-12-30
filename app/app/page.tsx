@@ -1,3 +1,4 @@
+import { SessionProvider } from "next-auth/react";
 import { Header } from "@/components/header";
 import { SessionConfig } from "@/components/session-config";
 import { H1 } from "@/components/ui/typography";
@@ -12,16 +13,18 @@ export default async function Page() {
   // console.log({ boardsData });
 
   return (
-    <div className="w-full">
-      <Header />
-      <div className="flex justify-center">
-        <div className="w-[740px]">
-          <div className="py-6">
-            <H1 className="text-left">Drawing Session</H1>
+    <SessionProvider>
+      <div className="w-full">
+        <Header />
+        <div className="flex justify-center">
+          <div className="w-[740px]">
+            <div className="py-6">
+              <H1 className="text-left">Drawing Session</H1>
+            </div>
+            <SessionConfig boardsPromise={boardsPromise} />
           </div>
-          <SessionConfig boardsPromise={boardsPromise} />
         </div>
       </div>
-    </div>
+    </SessionProvider>
   );
 }
