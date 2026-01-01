@@ -13,14 +13,6 @@ export function Footer() {
             <div>Support</div>
           </div>
         </Link>
-        <Link href="/terms" className="hover:bg-accent">
-          <div className="text-xs flex space-x-1 items-center h-6 px-3 rounded-md">
-            <div>
-              <FileText size={16} />
-            </div>
-            <div>Terms</div>
-          </div>
-        </Link>
         <Link href="/privacy" className="hover:bg-accent">
           <div className="text-xs flex space-x-1 items-center h-6 px-3 rounded-md">
             <div>

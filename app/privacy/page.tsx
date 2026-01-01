@@ -9,7 +9,10 @@ export default function Privacy() {
         <H1 className="text-left">Privacy Policy</H1>
       </div>
       <Card>
-        <CardContent>test</CardContent>
+        <CardContent>
+          No data is collected. Pose Pulse merely displays images hosted on
+          Pinterest. Local images you use are not stored.
+        </CardContent>
       </Card>
     </PageLayout>
   );
