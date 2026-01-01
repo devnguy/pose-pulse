@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { H3 } from "@/components/ui/typography";
-import { Eclipse } from "lucide-react";
 import { auth, signIn, signOut } from "@/auth";
+import { ThemeToggleButton } from "../theme/toggle-button";
 
 export async function Header() {
   const session = await auth();
@@ -18,9 +18,7 @@ export async function Header() {
       </div>
       <div className="flex items-center space-x-2">
         {!session?.user ? <SignInButton /> : <SignOutButton />}
-        <Button variant="ghost" size="icon" type="button">
-          <Eclipse />
-        </Button>
+        <ThemeToggleButton />
       </div>
     </div>
   );
