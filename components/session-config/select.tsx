@@ -9,6 +9,7 @@ import {
 import { ImageSourceType, SessionType } from ".";
 import { ClassPreset } from "./class-mode-form";
 
+// TODO: Map these values eventually
 export function CountSelect({ ...props }: React.ComponentProps<typeof Select>) {
   return (
     <Select {...props}>
@@ -18,6 +19,8 @@ export function CountSelect({ ...props }: React.ComponentProps<typeof Select>) {
         </SelectTrigger>
       </FormControl>
       <SelectContent>
+        <SelectItem value="1">1</SelectItem>
+        <SelectItem value="2">2</SelectItem>
         <SelectItem value="5">5</SelectItem>
         <SelectItem value="10">10</SelectItem>
         <SelectItem value="15">15</SelectItem>

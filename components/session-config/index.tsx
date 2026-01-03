@@ -110,10 +110,9 @@ const defaultValues = {
   standardModeInput: DEFAULT_SECTION_CONFIG,
   classModeInput: ClassPreset.THIRTY_MIN,
   isHardModeEnabled: false,
-  // temporary values for easier testing
   customModeInput: [
     {
-      count: "5",
+      count: "10",
       interval: "30",
     },
     {
@@ -121,8 +120,12 @@ const defaultValues = {
       interval: "60",
     },
     {
-      count: "5",
-      interval: "90",
+      count: "2",
+      interval: "300",
+    },
+    {
+      count: "1",
+      interval: "600",
     },
   ],
 };
