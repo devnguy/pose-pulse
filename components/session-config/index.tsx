@@ -105,7 +105,7 @@ type SessionConfigProps = {
 };
 
 const defaultValues = {
-  imageSource: ImageSourceType.LOCAL,
+  imageSource: ImageSourceType.PINTEREST,
   sessionType: SessionType.STANDARD,
   standardModeInput: DEFAULT_SECTION_CONFIG,
   classModeInput: ClassPreset.THIRTY_MIN,

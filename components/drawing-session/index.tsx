@@ -78,6 +78,10 @@ export default function DrawingSession() {
     }
   }, [data, dispatch]);
 
+  if (state.error) {
+    throw new Error(state.error.message);
+  }
+
   const handleForward = useCallback(() => {
     dispatch({ type: "FORWARD" });
   }, [dispatch]);

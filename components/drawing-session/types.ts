@@ -21,4 +21,5 @@ export type DrawingSessionState = {
   isHardModeEnabled: boolean;
   boardId?: string;
   current?: Reference;
+  error?: Error;
 };

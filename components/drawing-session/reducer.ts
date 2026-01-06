@@ -12,7 +12,8 @@ export type DrawingSessionAction =
   | DrawingSessionActionBack
   | DrawingSessionActionTogglePause
   | DrawingSessionActionStop
-  | DrawingSessionActionAddToImagePool;
+  | DrawingSessionActionAddToImagePool
+  | DrawingSessionActionClearError;
 
 type DrawingSessionActionInit = {
   type: "INIT";
@@ -43,6 +44,9 @@ type DrawingSessionActionAddToImagePool = {
     images: Array<string>;
   };
 };
+type DrawingSessionActionClearError = {
+  type: "CLEAR_ERROR";
+};
 
 export function reducer(
   state: DrawingSessionState,
@@ -63,6 +67,8 @@ export function reducer(
       return stop(state);
     case "ADD_TO_IMAGE_POOL":
       return addToImagePool(state, action.payload);
+    case "CLEAR_ERROR":
+      return clearError(state);
     default:
       throw new Error("unsupported action");
   }
@@ -105,7 +111,10 @@ function init(
 
 function startSession(state: DrawingSessionState): DrawingSessionState {
   if (state.pool.images.length === 0) {
-    throw new Error("No images in image pool");
+    return {
+      ...state,
+      error: new Error("No images in image pool"),
+    };
   }
   // Take a new item from the pool
   const randomIndex = getRandomInt(state.pool.images.length);
@@ -208,11 +217,23 @@ function addToImagePool(
   state: DrawingSessionState,
   payload: DrawingSessionActionAddToImagePool["payload"],
 ): DrawingSessionState {
+  if (payload.images) {
+    return {
+      ...state,
+      pool: {
+        ...state.pool,
+        images: [...state.pool.images, ...payload.images],
+      },
+    };
+  }
   return {
     ...state,
-    pool: {
-      ...state.pool,
-      images: [...state.pool.images, ...payload.images],
-    },
+  };
+}
+
+function clearError(state: DrawingSessionState): DrawingSessionState {
+  return {
+    ...state,
+    error: undefined,
   };
 }
