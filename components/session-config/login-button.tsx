@@ -1,11 +1,9 @@
-"use client";
-
 import { signIn, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useState } from "react";
 
-export const LoginButton = () => {
+export const LoginButtonClient = () => {
   const { status } = useSession();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -24,7 +22,7 @@ export const LoginButton = () => {
     <Button
       variant="outline"
       type="button"
-      disabled={status === "loading"}
+      disabled={status === "loading" || isLoading}
       onClick={handleSignIn}
     >
       {status === "loading" || isLoading ? <Spinner /> : "Connect to Pinterest"}

@@ -30,8 +30,9 @@ import {
   ClassPreset,
 } from "@/components/session-config/class-mode-form";
 import { getClassModeValueFromPreset } from "@/components/session-config/class-preset-map";
-import { useSession } from "next-auth/react";
-import { LoginButton } from "@/components/session-config/login-button";
+import { use } from "react";
+import { Session } from "next-auth";
+import { LoginButtonClient } from "@/components/session-config/login-button";
 
 export enum SessionType {
   STANDARD = "STANDARD",
@@ -105,6 +106,7 @@ export const DEFAULT_SECTION_CONFIG = {
 
 type SessionConfigProps = {
   boardsPromise: Promise<ImageSourceResponse<BoardItem>>;
+  sessionPromise: Promise<Session | null>;
 };
 
 const defaultValues = {
@@ -134,10 +136,11 @@ const defaultValues = {
 };
 
 export function SessionConfig(props: SessionConfigProps) {
-  const { boardsPromise } = props;
+  const { boardsPromise, sessionPromise } = props;
+  const session = use(sessionPromise);
+
   const router = useRouter();
   const { dispatch } = useDrawingSessionContext();
-  const { data: session } = useSession();
 
   const form = useForm<SessionConfigFormSchema>({
     resolver: zodResolver(FormSchema),
@@ -240,7 +243,7 @@ export function SessionConfig(props: SessionConfigProps) {
                           />
                         </div>
                         {!session?.user ? (
-                          <LoginButton />
+                          <LoginButtonClient />
                         ) : (
                           // choose board button or chosen board
                           <ChooseBoardDialog boardsPromise={boardsPromise} />

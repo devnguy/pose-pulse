@@ -17,14 +17,14 @@ export async function Header() {
         </Link>
       </div>
       <div className="flex items-center space-x-2">
-        {!session?.user ? <SignInButton /> : <SignOutButton />}
+        {!session?.user ? <LoginButtonServer /> : <LogoutButtonServer />}
         <ThemeSelect />
       </div>
     </div>
   );
 }
 
-function SignInButton() {
+export function LoginButtonServer() {
   return (
     <form
       action={async () => {
@@ -39,7 +39,7 @@ function SignInButton() {
   );
 }
 
-function SignOutButton() {
+function LogoutButtonServer() {
   return (
     <form
       action={async () => {
