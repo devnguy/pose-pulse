@@ -5,7 +5,7 @@ export function Footer() {
   return (
     <footer className="w-full px-16 pb-16 space-y-4 flex justify-center">
       <div className="flex space-x-2">
-        <Link href="/app" className="hover:bg-accent ">
+        <Link href="/" className="hover:bg-accent ">
           <div className="text-xs flex space-x-1 items-center h-6 px-3 rounded-md">
             <div>
               <Coins size={16} />

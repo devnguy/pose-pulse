@@ -20,7 +20,7 @@ export default function Error({
     dispatch({ type: "CLEAR_ERROR" });
 
     // TODO: Just redirecting back to home page for now
-    router.push("/app");
+    router.push("/");
   }, [error, router, dispatch]);
 
   return (

@@ -10,7 +10,7 @@ export async function Header() {
   return (
     <div className="h-[64px] flex items-center justify-between">
       <div className="flex items-center">
-        <Link href="/app">
+        <Link href="/">
           <Button variant="link" size="sm" className="p-0">
             <H3>Pose Pulse</H3>
           </Button>
@@ -29,7 +29,7 @@ function SignInButton() {
     <form
       action={async () => {
         "use server";
-        await signIn("pinterest", { redirectTo: "/app" });
+        await signIn("pinterest", { redirectTo: "/" });
       }}
     >
       <Button variant="outline" type="submit">
