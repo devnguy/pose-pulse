@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CodeXml, Coins, FileText, Lock } from "lucide-react";
+import { CodeXml, Coins, Lock } from "lucide-react";
 
 export function Footer() {
   return (

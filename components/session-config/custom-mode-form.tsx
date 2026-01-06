@@ -16,6 +16,7 @@ import {
 import {
   DEFAULT_SECTION_CONFIG,
   SessionConfigFormSchema,
+  SessionSection,
 } from "@/components/session-config";
 import { Button } from "@/components/ui/button";
 import { GripVertical, Plus, X } from "lucide-react";
@@ -114,7 +115,7 @@ function SectionRow(props: SectionRowProps) {
     [move],
   );
 
-  const item = fields[index];
+  const item: (typeof fields)[number] & Partial<SessionSection> = fields[index];
 
   const { ref, dragHandleRef, dragAndDropState, Preview } =
     useDragAndDropReorder({
@@ -217,7 +218,7 @@ function SectionRow(props: SectionRowProps) {
           />
         ) : null}
         <Preview
-          content={`${item.count} x ${getIntervalLabel(item.interval)}`}
+          content={`${item.count} x ${item.interval && getIntervalLabel(item.interval)}`}
         />
       </TableCell>
     </TableRow>
