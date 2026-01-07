@@ -15,10 +15,9 @@ export function CurrentImage(props: CurrentImageProps) {
           alt=""
           fill
           className="object-contain"
-          quality={50}
+          quality={70}
           priority={true}
           preload={true}
-          placeholder="blur"
         />
       )}
     </div>

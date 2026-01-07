@@ -80,7 +80,6 @@ export default function BoardGroupItem(props: BoardCardProps) {
                 className="object-cover"
                 sizes="100vh"
                 priority
-                placeholder="blur"
               />
             </div>
 
@@ -92,7 +91,6 @@ export default function BoardGroupItem(props: BoardCardProps) {
                   fill
                   className="object-cover"
                   sizes="100vh"
-                  placeholder="blur"
                 />
               ) : (
                 <div className="w-full h-full bg-slate-200" />
@@ -106,7 +104,6 @@ export default function BoardGroupItem(props: BoardCardProps) {
                   fill
                   className="object-cover"
                   sizes="100vh"
-                  placeholder="blur"
                 />
               ) : (
                 <div className="w-full h-full bg-slate-200" />

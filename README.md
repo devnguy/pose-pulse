@@ -1,10 +1,9 @@
-## Getting Started
+# Pose Pulse
 
-First, run the development server:
+A tool for artists who want to use references for timed drawings, whether the
+references be from a Pinterest board, or from a local machine.
 
-```bash
-npm run dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the
-result.
+If you have suggestions or find any bugs, please use the
+[issues](https://github.com/devnguy/pose-pulse/issues) page.
