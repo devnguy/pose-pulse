@@ -1,4 +1,4 @@
-# Pose Pulse
+# Rephemeral
 
 A tool for artists who want to use references for timed drawings, whether the
 references be from a Pinterest board, or from a local machine.

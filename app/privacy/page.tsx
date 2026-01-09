@@ -10,7 +10,7 @@ export default function Privacy() {
       </div>
       <Card>
         <CardContent>
-          No data is collected. Pose Pulse merely displays images hosted on
+          No data is collected. Rephemeral merely displays images hosted on
           Pinterest. Local images you use are not stored.
         </CardContent>
       </Card>

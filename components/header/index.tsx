@@ -12,7 +12,7 @@ export async function Header() {
       <div className="flex items-center">
         <Link href="/">
           <Button variant="link" size="sm" className="p-0">
-            <H3>Pose Pulse</H3>
+            <H3>Rephemeral</H3>
           </Button>
         </Link>
       </div>

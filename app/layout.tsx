@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Pose Pulse",
+  title: "Rephemeral",
   description: "",
 };
 
