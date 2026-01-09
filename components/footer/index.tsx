@@ -22,7 +22,7 @@ export function Footer() {
           </div>
         </Link>
         <Link
-          href="http://github.com/devnguy/pose-pulse"
+          href="http://github.com/devnguy/rephemeral"
           target="_blank"
           className="hover:bg-accent"
         >

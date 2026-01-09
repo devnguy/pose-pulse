@@ -6,4 +6,4 @@ references be from a Pinterest board, or from a local machine.
 ---
 
 If you have suggestions or find any bugs, please use the
-[issues](https://github.com/devnguy/pose-pulse/issues) page.
+[issues](https://github.com/devnguy/rephemeral/issues) page.
